@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@cieng/shared"],
+  transpilePackages: ["@hasahasa/shared"],
 };
 
 export default nextConfig;

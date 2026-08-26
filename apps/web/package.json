@@ -1,5 +1,5 @@
 {
-  "name": "@cieng/web",
+  "name": "@hasahasa/web",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@cieng/shared": "workspace:*",
+    "@hasahasa/shared": "workspace:*",
     "@tanstack/react-query": "^5.85.5",
     "next": "^15.5.0",
     "react": "^19.1.1",
@@ -18,7 +18,7 @@
     "zod": "^4.1.1"
   },
   "devDependencies": {
-    "@cieng/typescript-config": "workspace:*",
+    "@hasahasa/typescript-config": "workspace:*",
     "@eslint/eslintrc": "^3.3.1",
     "@tailwindcss/postcss": "^4.1.12",
     "@types/node": "^24.3.0",

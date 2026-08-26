@@ -1,6 +1,6 @@
 # HASA HASA
 
-HASA HASA restaurant platform monorepo (repo: cieng) — Turborepo + pnpm workspaces, TypeScript everywhere.
+HASA HASA restaurant platform monorepo (repo: hasa-hasa) — Turborepo + pnpm workspaces, TypeScript everywhere.
 
 ## Structure
 
@@ -25,11 +25,11 @@ pnpm lint         # lint everything
 pnpm typecheck    # typecheck everything
 ```
 
-Run a single app: `pnpm --filter @cieng/web dev`
+Run a single app: `pnpm --filter @hasahasa/web dev`
 
 ## Notes
 
 - `.npmrc` sets `node-linker=hoisted` — required by Expo/React Native tooling when the mobile app lands.
-- Shared validation lives in `@cieng/shared` (Zod) and is imported by both client and server code.
+- Shared validation lives in `@hasahasa/shared` (Zod) and is imported by both client and server code.
 - External services planned: MTN MoMo (payments, behind a provider interface), Africa's Talking (SMS), MapLibre + OpenStreetMap (maps), Firebase Cloud Messaging (push).
 - Deploy targets: Vercel (web), Railway/Render (backend), Neon/Supabase (Postgres), GitHub Actions (CI).

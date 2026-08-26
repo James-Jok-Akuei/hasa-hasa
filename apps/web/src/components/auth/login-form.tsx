@@ -1,6 +1,6 @@
 "use client";
 
-import { loginSchema, type LoginInput } from "@cieng/shared";
+import { loginSchema, type LoginInput } from "@hasahasa/shared";
 import Link from "next/link";
 import { useState } from "react";
 import {

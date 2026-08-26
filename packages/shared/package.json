@@ -1,5 +1,5 @@
 {
-  "name": "@cieng/shared",
+  "name": "@hasahasa/shared",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -13,7 +13,7 @@
     "zod": "^4.1.1"
   },
   "devDependencies": {
-    "@cieng/typescript-config": "workspace:*",
+    "@hasahasa/typescript-config": "workspace:*",
     "typescript": "^5.9.2"
   }
 }

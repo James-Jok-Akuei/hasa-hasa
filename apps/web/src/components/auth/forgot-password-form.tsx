@@ -3,7 +3,7 @@
 import {
   forgotPasswordSchema,
   type ForgotPasswordInput,
-} from "@cieng/shared";
+} from "@hasahasa/shared";
 import Link from "next/link";
 import { useState } from "react";
 import { Field, inputClassName, SubmitButton } from "@/components/auth/field";
