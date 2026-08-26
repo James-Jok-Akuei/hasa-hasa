@@ -1,6 +1,6 @@
-# Cieng
+# HASA HASA
 
-Restaurant platform monorepo — Turborepo + pnpm workspaces, TypeScript everywhere.
+HASA HASA restaurant platform monorepo (repo: cieng) — Turborepo + pnpm workspaces, TypeScript everywhere.
 
 ## Structure
 

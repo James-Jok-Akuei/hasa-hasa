@@ -2,6 +2,7 @@ import Image from "next/image";
 import { VideoBackground } from "@/components/auth/video-background";
 import authBgLandscape from "@/app/assets/images/auth-bg-landscape.jpeg";
 import authBgPortrait from "@/app/assets/images/auth-bg-portrait.jpeg";
+import logo from "@/app/assets/logos/logo-main.svg";
 
 /**
  * Shared scaffold for the auth screens: photographic poster layer,
@@ -49,10 +50,8 @@ export function AuthShell({
       <div className="absolute inset-0 bg-linear-to-b from-black/65 via-black/20 to-black/50 lg:bg-linear-to-r lg:from-black/75 lg:via-black/35 lg:to-transparent" />
 
       {/* Brand mark */}
-      <header className="absolute inset-x-0 top-0 z-10 flex items-baseline gap-3 px-6 py-6 sm:px-10">
-        <span className="text-xl font-semibold tracking-[0.35em] text-white">
-          CIENG
-        </span>
+      <header className="absolute inset-x-0 top-0 z-10 flex items-center gap-3 px-6 py-6 sm:px-10">
+        <Image src={logo} alt="HASA HASA" priority className="h-8 w-auto sm:h-9" />
         <span className="hidden text-[0.65rem] font-light uppercase tracking-[0.3em] text-white/50 sm:inline">
           Restaurant OS
         </span>

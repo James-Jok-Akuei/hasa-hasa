@@ -3,7 +3,7 @@ import { AuthShell } from "@/components/auth/auth-shell";
 import { SignupForm } from "@/components/auth/signup-form";
 
 export const metadata: Metadata = {
-  title: "Create account — Cieng",
+  title: "Create account — HASA HASA",
 };
 
 export default function SignupPage() {

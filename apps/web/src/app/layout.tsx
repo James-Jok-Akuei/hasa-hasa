@@ -10,8 +10,8 @@ const jost = Jost({
 });
 
 export const metadata: Metadata = {
-  title: "Cieng — Restaurant Dashboard",
-  description: "Business dashboard for restaurant operations",
+  title: "HASA HASA — Restaurant Dashboard",
+  description: "HASA HASA — business dashboard for restaurant operations",
 };
 
 export default function RootLayout({
