@@ -1,6 +1,11 @@
-import { redirect } from "next/navigation";
+import { HeroSection } from "@/components/landing/hero-section";
+import { HowItWorks } from "@/components/landing/how-it-works";
 
-export default function Home() {
-  // Auth is the only screen so far — the dashboard will take over "/" later.
-  redirect("/login");
+export default function LandingPage() {
+  return (
+    <main className="flex min-h-dvh flex-col bg-brand-500 font-body">
+      <HeroSection />
+      <HowItWorks />
+    </main>
+  );
 }

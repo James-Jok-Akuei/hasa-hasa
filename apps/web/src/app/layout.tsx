@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
-import { Jost } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
-const jost = Jost({
+// Plus Jakarta Sans — the warm geometric sans food-delivery brands favour.
+// One family, many weights: display weights carry headings, regular carries body.
+const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-jost",
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-jakarta",
   display: "swap",
 });
 
@@ -18,8 +21,13 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body className={jost.variable}>
+    // Font variables belong on <html>: the @theme tokens that reference them
+    // (--font-sans, --font-body, --font-heading) are declared on :root.
+    <html
+      lang="en"
+      className={jakarta.variable}
+    >
+      <body>
         <Providers>{children}</Providers>
       </body>
     </html>

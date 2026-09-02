@@ -50,11 +50,14 @@ export function AuthShell({
       <div className="absolute inset-0 bg-linear-to-b from-black/65 via-black/20 to-black/50 lg:bg-linear-to-r lg:from-black/75 lg:via-black/35 lg:to-transparent" />
 
       {/* Brand mark */}
-      <header className="absolute inset-x-0 top-0 z-10 flex items-center gap-3 px-6 py-6 sm:px-10">
-        <Image src={logo} alt="HASA HASA" priority className="h-8 w-auto sm:h-9" />
-        <span className="hidden text-[0.65rem] font-light uppercase tracking-[0.3em] text-white/50 sm:inline">
-          Restaurant OS
-        </span>
+      <header className="absolute inset-x-0 top-0 z-10 px-6 py-6 lg:px-[8vw]">
+        {/* Mirrors the form column: centered max-w-sm below lg, left-anchored on lg+ */}
+        <div className="mx-auto flex w-full max-w-sm items-center justify-between gap-3 lg:mx-0">
+          <Image src={logo} alt="HASA HASA" priority className="h-8 w-auto sm:h-9" />
+          <span className="whitespace-nowrap text-[0.6rem] font-light uppercase tracking-[0.25em] text-white/50 sm:text-[0.65rem] sm:tracking-[0.3em]">
+            Restaurant Dashboard
+          </span>
+        </div>
       </header>
 
       {/* Form — centered on mobile, anchored to the dark left half on desktop */}
