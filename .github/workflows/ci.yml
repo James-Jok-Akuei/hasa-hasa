@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, staging]
+  push:
+    branches: [main, staging]
+
+# A new push to the same branch cancels the previous run.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Turbo diffs against the base commit to decide what changed,
+          # so it needs real history, not a shallow clone.
+          fetch-depth: 0
+
+      # Reads the pnpm version from "packageManager" in package.json.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Path filtering: only build the workspaces touched since the base.
+      # Falls back to building everything when the base can't be resolved
+      # (first push to a branch, force-push, shallow history).
+      - name: Resolve affected workspaces
+        id: scope
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE="origin/${{ github.base_ref }}"
+          else
+            BASE="${{ github.event.before }}"
+          fi
+
+          if [ -z "$BASE" ] || ! git rev-parse --verify --quiet "$BASE^{commit}" >/dev/null; then
+            echo "Base '$BASE' unavailable — running the full workspace."
+            echo "filter=" >> "$GITHUB_OUTPUT"
+          else
+            echo "Base resolved to $BASE — running affected workspaces only."
+            echo "filter=--filter=...[$BASE]" >> "$GITHUB_OUTPUT"
+          fi
+
+      - run: pnpm exec turbo run lint typecheck build ${{ steps.scope.outputs.filter }}
