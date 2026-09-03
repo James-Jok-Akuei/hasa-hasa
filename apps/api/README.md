@@ -15,9 +15,24 @@ pnpm dev            # http://localhost:4000
 ```
 
 `EMAIL_PROVIDER=console` prints one-time codes to the terminal, so nothing
-blocks on a transactional email account. Set `EMAIL_PROVIDER=resend` with
-`RESEND_API_KEY` and `RESEND_FROM` before staging — **login does not work
-without a real provider**, since the code never reaches the user.
+blocks on a transactional email account.
+
+Set `EMAIL_PROVIDER=resend` with `RESEND_API_KEY` and `RESEND_FROM` before
+staging — **login does not work without a real provider**, since the code
+never reaches the user. The API refuses to boot with `console` when
+`NODE_ENV=production`, rather than starting and locking everyone out.
+
+Deployment, secrets and the Railway setup are in [docs/DEPLOY.md](../../docs/DEPLOY.md).
+
+## Docker
+
+```sh
+docker build -f apps/api/Dockerfile -t hasahasa-api .   # from the repo root
+```
+
+The build context is the **repository root**, not `apps/api` — pnpm needs the
+workspace manifests and `packages/shared`. `prisma migrate deploy` runs in the
+container's start command, so schema and code ship together.
 
 ## The approval gate
 
