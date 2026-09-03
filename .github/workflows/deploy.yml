@@ -1,0 +1,48 @@
+name: Deploy
+
+# staging branch -> staging environment
+# main branch    -> production environment
+#
+# Production uses a GitHub Environment, so you can require a manual approval
+# before it runs: Settings > Environments > production > required reviewers.
+# That approval gate is what makes "test on staging, then promote" real.
+
+on:
+  push:
+    branches: [staging, main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    environment:
+      name: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy the API
+        run: |
+          TARGET="${{ github.ref_name == 'main' && 'production' || 'staging' }}"
+          echo "Would deploy the API to: $TARGET"
+          echo
+          echo "TODO: replace this with the real deploy once hosting is chosen."
+          echo
+          echo "  Railway:"
+          echo "    npm i -g @railway/cli"
+          echo "    railway up --service api-$TARGET"
+          echo "    (set RAILWAY_TOKEN in repo secrets)"
+          echo
+          echo "  Render:"
+          echo "    curl -fsS -X POST \"\$RENDER_DEPLOY_HOOK_${TARGET^^}\""
+          echo
+          echo "The web app deploys from Vercel's own git integration,"
+          echo "not from here — point its Production Branch at main and"
+          echo "add staging as a second project or a preview branch."
