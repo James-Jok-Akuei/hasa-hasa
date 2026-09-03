@@ -14,11 +14,13 @@ export class OtpError extends Error {
       | "COOLDOWN"
       | "INVALID"
       | "EXPIRED"
-      | "TOO_MANY_ATTEMPTS",
+      | "TOO_MANY_ATTEMPTS"
+      | "SEND_FAILED",
     message: string,
     readonly retryAfterSeconds?: number,
+    options?: { cause?: unknown },
   ) {
-    super(message);
+    super(message, options);
   }
 }
 
@@ -50,12 +52,12 @@ export async function issueOtp(
 
   const code = generateOtp(OTP_LENGTH);
 
-  await prisma.$transaction([
-    prisma.otpCode.updateMany({
+  const created = await prisma.$transaction(async (tx) => {
+    await tx.otpCode.updateMany({
       where: { email: address, purpose, consumedAt: null },
       data: { consumedAt: new Date() },
-    }),
-    prisma.otpCode.create({
+    });
+    return tx.otpCode.create({
       data: {
         email: address,
         purpose,
@@ -63,10 +65,26 @@ export async function issueOtp(
         payload,
         expiresAt: new Date(Date.now() + TTL_MS),
       },
-    }),
-  ]);
+    });
+  });
 
-  await email.sendOtp(address, code);
+  try {
+    await email.sendOtp(address, code);
+  } catch (error) {
+    // The row exists but nobody received the code. Left in place it would
+    // start the cooldown, so the user is told to wait 60 seconds for a code
+    // that never arrived. Remove it so they can retry at once.
+    await prisma.otpCode
+      .delete({ where: { id: created.id } })
+      .catch(() => undefined);
+
+    throw new OtpError(
+      "SEND_FAILED",
+      "We could not send the code just now. Try again in a moment.",
+      undefined,
+      { cause: error },
+    );
+  }
 }
 
 /**

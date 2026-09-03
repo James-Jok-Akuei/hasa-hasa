@@ -3,9 +3,9 @@ name: Deploy
 # staging branch -> staging environment
 # main branch    -> production environment
 #
-# Production uses a GitHub Environment, so you can require a manual approval
-# before it runs: Settings > Environments > production > required reviewers.
-# That approval gate is what makes "test on staging, then promote" real.
+# Production is a GitHub Environment, so a required reviewer can be added in
+# Settings > Environments > production. That approval is what makes "test on
+# staging, then promote" a gate rather than a convention.
 
 on:
   push:
@@ -25,24 +25,57 @@ jobs:
     environment:
       name: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
 
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      SERVICE: ${{ github.ref_name == 'main' && 'api-production' || 'api-staging' }}
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy the API
+      # Deploying is opt-in until hosting is set up. Without the token this
+      # exits green with instructions rather than painting every push red.
+      - name: Check for deploy credentials
+        id: creds
         run: |
-          TARGET="${{ github.ref_name == 'main' && 'production' || 'staging' }}"
-          echo "Would deploy the API to: $TARGET"
-          echo
-          echo "TODO: replace this with the real deploy once hosting is chosen."
-          echo
-          echo "  Railway:"
-          echo "    npm i -g @railway/cli"
-          echo "    railway up --service api-$TARGET"
-          echo "    (set RAILWAY_TOKEN in repo secrets)"
-          echo
-          echo "  Render:"
-          echo "    curl -fsS -X POST \"\$RENDER_DEPLOY_HOOK_${TARGET^^}\""
-          echo
-          echo "The web app deploys from Vercel's own git integration,"
-          echo "not from here — point its Production Branch at main and"
-          echo "add staging as a second project or a preview branch."
+          if [ -z "$RAILWAY_TOKEN" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::RAILWAY_TOKEN is not set — skipping deploy. See docs/DEPLOY.md."
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Verify the image builds
+        if: steps.creds.outputs.ready == 'false'
+        run: |
+          # Still worth proving the image is deployable even when we cannot
+          # ship it, so a broken Dockerfile is caught here and not later.
+          docker build -f apps/api/Dockerfile -t hasahasa-api:${{ github.sha }} .
+
+      - name: Install the Railway CLI
+        if: steps.creds.outputs.ready == 'true'
+        run: npm install -g @railway/cli
+
+      - name: Deploy the API
+        if: steps.creds.outputs.ready == 'true'
+        run: railway up --service "$SERVICE" --detach
+
+      # Migrations run in the container's start command, so the schema and the
+      # code that needs it always ship together. Nothing to run here.
+      - name: Wait for the service to answer
+        if: steps.creds.outputs.ready == 'true'
+        env:
+          HEALTH_URL: ${{ vars.HEALTH_URL }}
+        run: |
+          if [ -z "$HEALTH_URL" ]; then
+            echo "::warning::HEALTH_URL variable not set — cannot confirm the deploy is live."
+            exit 0
+          fi
+          for i in $(seq 1 30); do
+            if curl -fsS --max-time 5 "$HEALTH_URL" > /dev/null; then
+              echo "Healthy after $((i * 10))s"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::$HEALTH_URL never became healthy"
+          exit 1

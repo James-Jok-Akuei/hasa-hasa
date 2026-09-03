@@ -1,0 +1,11 @@
+# The web app's media is ~55MB and the API never serves it.
+apps/web
+**/node_modules
+**/dist
+**/.next
+**/.turbo
+.git
+.github
+*.log
+**/.env
+**/.env.local
