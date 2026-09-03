@@ -65,6 +65,23 @@ export async function buildApp() {
 
   app.get("/health", async () => ({ ok: true }));
 
+  // A bare GET / is what everyone tries first. Answering with the route list
+  // beats a 404 that looks like the server is broken.
+  app.get("/", async () => ({
+    service: "@hasahasa/api",
+    status: "ok",
+    endpoints: {
+      health: "GET /health",
+      signup: "POST /auth/signup -> POST /auth/signup/verify",
+      login: "POST /auth/login -> POST /auth/login/verify",
+      me: "GET /auth/me",
+      logout: "POST /auth/logout",
+      reviewQueue: "GET /admin/restaurants?status=PENDING",
+      approve: "POST /admin/restaurants/:id/approve",
+      reject: "POST /admin/restaurants/:id/reject",
+    },
+  }));
+
   await app.register(authRoutes);
   await app.register(adminRoutes);
 
