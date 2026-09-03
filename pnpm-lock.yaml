@@ -72,6 +72,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@hasahasa/api-client':
+        specifier: workspace:*
+        version: link:../../packages/api-client
       '@hasahasa/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -118,6 +121,19 @@ importers:
       tailwindcss:
         specifier: ^4.1.12
         version: 4.3.3
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.3
+
+  packages/api-client:
+    dependencies:
+      '@hasahasa/shared':
+        specifier: workspace:*
+        version: link:../shared
+    devDependencies:
+      '@hasahasa/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
       typescript:
         specifier: ^5.9.2
         version: 5.9.3
