@@ -5,6 +5,11 @@ import {
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { prisma } from "../../lib/prisma.js";
+import {
+  errorResponse,
+  restaurantListResponse,
+  restaurantResponse,
+} from "../../lib/responses.js";
 import { requireAdmin } from "../../plugins/auth.js";
 
 const idParams = z.object({ id: z.string().min(1) });
@@ -16,7 +21,28 @@ const adminRoutes: FastifyPluginAsyncZod = async (app) => {
   /** The review queue. Defaults to newest first so the backlog is visible. */
   app.get(
     "/admin/restaurants",
-    { schema: { querystring: listRestaurantsQuerySchema } },
+    {
+      schema: {
+        tags: ["Admin"],
+        summary: "The review queue",
+        description: [
+          "Restaurants awaiting or past review, newest first.",
+          "",
+          "Filter with `?status=PENDING` for the outstanding queue. Paginate",
+          "with `?limit=` and `?cursor=`, passing back the `nextCursor` from",
+          "the previous page — it is null on the last page.",
+          "",
+          "Each row includes the owner who applied, so a reviewer can contact",
+          "them without a second request.",
+        ].join("\n"),
+        querystring: listRestaurantsQuerySchema,
+        security: [{ cookieAuth: [] }, { bearerAuth: [] }],
+        response: {
+          200: restaurantListResponse,
+          404: errorResponse.describe("Not an admin"),
+        },
+      },
+    },
     async (request, reply) => {
       const { status, limit, cursor } = request.query;
 
@@ -61,7 +87,27 @@ const adminRoutes: FastifyPluginAsyncZod = async (app) => {
    */
   app.post(
     "/admin/restaurants/:id/approve",
-    { schema: { params: idParams } },
+    {
+      schema: {
+        tags: ["Admin"],
+        summary: "Approve a restaurant",
+        description: [
+          "Moves a **PENDING** restaurant to **APPROVED**, opening the",
+          "dashboard for its owner. Records who approved it and when.",
+          "",
+          "Only acts on a PENDING restaurant — approving one that has already",
+          "been reviewed returns 409 rather than overwriting the original",
+          "reviewer and timestamp. A double-click is safe.",
+        ].join("\n"),
+        params: idParams,
+        security: [{ cookieAuth: [] }, { bearerAuth: [] }],
+        response: {
+          200: restaurantResponse,
+          404: errorResponse.describe("Not an admin, or no such restaurant"),
+          409: errorResponse.describe("Already reviewed — not PENDING"),
+        },
+      },
+    },
     async (request, reply) => {
       const result = await prisma.restaurant.updateMany({
         where: { id: request.params.id, status: "PENDING" },
@@ -89,7 +135,30 @@ const adminRoutes: FastifyPluginAsyncZod = async (app) => {
   /** Reject. A reason is required — the merchant is shown it. */
   app.post(
     "/admin/restaurants/:id/reject",
-    { schema: { params: idParams, body: rejectRestaurantSchema } },
+    {
+      schema: {
+        tags: ["Admin"],
+        summary: "Reject a restaurant",
+        description: [
+          "Moves a **PENDING** restaurant to **REJECTED**.",
+          "",
+          "A reason is required and is **shown to the merchant** on their",
+          "holding screen, so write it for them rather than as an internal",
+          "note.",
+          "",
+          "Guarded on PENDING the same way approve is.",
+        ].join("\n"),
+        params: idParams,
+        body: rejectRestaurantSchema,
+        security: [{ cookieAuth: [] }, { bearerAuth: [] }],
+        response: {
+          200: restaurantResponse,
+          400: errorResponse.describe("Reason missing"),
+          404: errorResponse.describe("Not an admin, or no such restaurant"),
+          409: errorResponse.describe("Already reviewed — not PENDING"),
+        },
+      },
+    },
     async (request, reply) => {
       const result = await prisma.restaurant.updateMany({
         where: { id: request.params.id, status: "PENDING" },

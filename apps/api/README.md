@@ -31,6 +31,14 @@ normally and `GET /auth/me` returns their status — the dashboard routes them
 to a holding screen. Blocking login outright would leave them unable to check
 their own status.
 
+## API documentation
+
+Swagger UI at **http://localhost:4000/docs**, raw spec at `/docs/json`.
+
+The spec is generated from the same Zod schemas the routes validate against,
+so it cannot drift from actual behaviour — change a schema and the docs move
+with it.
+
 ## Endpoints
 
 | Method | Path | Notes |

@@ -5,6 +5,8 @@ import {
   verifyOtpSchema,
 } from "@hasahasa/shared";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
+import { sessionSchema } from "@hasahasa/shared";
+import { z } from "zod";
 import { isProduction } from "../../lib/env.js";
 import { consumeOtp, issueOtp, OtpError } from "../../lib/otp.js";
 import { prisma } from "../../lib/prisma.js";
@@ -14,6 +16,11 @@ import {
   SESSION_COOKIE,
   sessionCookieOptions,
 } from "../../lib/session.js";
+import {
+  errorResponse,
+  otpSentResponse,
+  sessionResponse,
+} from "../../lib/responses.js";
 import { requireUser } from "../../plugins/auth.js";
 import { serializeSession } from "./serialize.js";
 
@@ -26,7 +33,31 @@ const authRoutes: FastifyPluginAsyncZod = async (app) => {
    */
   app.post(
     "/auth/signup",
-    { schema: { body: signupSchema } },
+    {
+      schema: {
+        tags: ["Auth"],
+        summary: "Start a restaurant application",
+        description: [
+          "Step one of two. Mails a six-digit code to the address given.",
+          "",
+          "**Nothing is written to the database yet.** The application details",
+          "are held against the code and only become a User and a Restaurant",
+          "once `/auth/signup/verify` succeeds. Without this, anyone could",
+          "fill the review queue with applications for addresses they do not",
+          "control.",
+          "",
+          "One code is live per address at a time — requesting another",
+          "invalidates the previous one. There is a 60 second cooldown.",
+        ].join("\n"),
+        body: signupSchema,
+        response: {
+          202: otpSentResponse.describe("Code sent"),
+          400: errorResponse.describe("Validation failed"),
+          409: errorResponse.describe("An account already exists for this email"),
+          429: errorResponse.describe("Cooldown — see retryAfterSeconds"),
+        },
+      },
+    },
     async (request, reply) => {
       const body = request.body;
 
@@ -60,7 +91,29 @@ const authRoutes: FastifyPluginAsyncZod = async (app) => {
   /** Step two: the code proves the address, so the application is created. */
   app.post(
     "/auth/signup/verify",
-    { schema: { body: signupVerifySchema } },
+    {
+      schema: {
+        tags: ["Auth"],
+        summary: "Verify the code and create the application",
+        description: [
+          "Step two of two. Consumes the code and creates the User, the",
+          "Restaurant as **PENDING**, and an OWNER membership joining them.",
+          "",
+          "The restaurant details come from what was captured at step one,",
+          "not from this request body — a client cannot change the name or",
+          "phone between the two steps.",
+          "",
+          "Sets the session cookie and returns the same session as a bearer",
+          "token. The account exists but the dashboard stays closed until an",
+          "admin approves it.",
+        ].join("\n"),
+        body: signupVerifySchema,
+        response: {
+          201: sessionResponse.describe("Application created, restaurant PENDING"),
+          400: errorResponse.describe("Code invalid, expired, or too many attempts"),
+        },
+      },
+    },
     async (request, reply) => {
       const { code, email: address } = request.body;
 
@@ -112,7 +165,28 @@ const authRoutes: FastifyPluginAsyncZod = async (app) => {
    */
   app.post(
     "/auth/login",
-    { schema: { body: requestOtpSchema } },
+    {
+      schema: {
+        tags: ["Auth"],
+        summary: "Request a sign-in code",
+        description: [
+          "Step one of two. Mails a six-digit code if the address has an",
+          "account.",
+          "",
+          "**Always answers 202, whether or not the account exists.** Telling",
+          "a caller which addresses are registered would let anyone enumerate",
+          "the merchant list.",
+          "",
+          "Subject to the same 60 second cooldown as signup.",
+        ].join("\n"),
+        body: requestOtpSchema,
+        response: {
+          202: otpSentResponse.describe("Answered identically for unknown addresses"),
+          400: errorResponse.describe("Validation failed"),
+          429: errorResponse.describe("Cooldown — see retryAfterSeconds"),
+        },
+      },
+    },
     async (request, reply) => {
       const user = await prisma.user.findUnique({
         where: { email: request.body.email },
@@ -139,7 +213,26 @@ const authRoutes: FastifyPluginAsyncZod = async (app) => {
 
   app.post(
     "/auth/login/verify",
-    { schema: { body: verifyOtpSchema } },
+    {
+      schema: {
+        tags: ["Auth"],
+        summary: "Verify the code and open a session",
+        description: [
+          "Step two of two. Sets the session cookie and returns the same",
+          "token for native clients.",
+          "",
+          "Succeeds regardless of the restaurant's review status — check",
+          "`restaurant.status` on the response to decide where to send them.",
+          "A PENDING or REJECTED owner is signed in and belongs on a holding",
+          "screen, not the dashboard.",
+        ].join("\n"),
+        body: verifyOtpSchema,
+        response: {
+          200: sessionResponse.describe("Signed in — check restaurant.status"),
+          400: errorResponse.describe("Code invalid, expired, or too many attempts"),
+        },
+      },
+    },
     async (request, reply) => {
       const { code, email: address } = request.body;
 
@@ -171,20 +264,62 @@ const authRoutes: FastifyPluginAsyncZod = async (app) => {
    * The dashboard calls this on load. `restaurant.status` is what it routes
    * on: APPROVED goes to the dashboard, anything else to the holding screen.
    */
-  app.get("/auth/me", { preHandler: requireUser }, async (request, reply) => {
-    return reply.send(await serializeSession(request.session!.userId));
-  });
+  app.get(
+    "/auth/me",
+    {
+      preHandler: requireUser,
+      schema: {
+        tags: ["Auth"],
+        summary: "The current session",
+        description: [
+          "What the dashboard calls on load.",
+          "",
+          "`restaurant.status` is the field to route on: **APPROVED** opens",
+          "the dashboard, anything else belongs on the holding screen.",
+          "`restaurant.rejectionReason` carries the explanation to show a",
+          "rejected merchant.",
+          "",
+          "`restaurant` is null for a platform admin, who belongs to none.",
+        ].join("\n"),
+        security: [{ cookieAuth: [] }, { bearerAuth: [] }],
+        response: {
+          200: sessionSchema,
+          401: errorResponse.describe("No valid session"),
+        },
+      },
+    },
+    async (request, reply) => {
+      return reply.send(await serializeSession(request.session!.userId));
+    },
+  );
 
-  app.post("/auth/logout", { preHandler: requireUser }, async (request, reply) => {
+  app.post(
+    "/auth/logout",
+    {
+      preHandler: requireUser,
+      schema: {
+        tags: ["Auth"],
+        summary: "End the session",
+        description:
+          "Revokes the session server-side and clears the cookie. The token is dead immediately, not just forgotten by the client.",
+        security: [{ cookieAuth: [] }, { bearerAuth: [] }],
+        response: {
+          204: z.null().describe("Session revoked"),
+          401: errorResponse.describe("No valid session"),
+        },
+      },
+    },
+    async (request, reply) => {
     const header = request.headers.authorization;
     const token = header?.startsWith("Bearer ")
       ? header.slice(7)
       : request.cookies[SESSION_COOKIE];
 
-    if (token) await revokeSession(token);
-    reply.clearCookie(SESSION_COOKIE, { path: "/" });
-    return reply.code(204).send();
-  });
+      if (token) await revokeSession(token);
+      reply.clearCookie(SESSION_COOKIE, { path: "/" });
+      return reply.code(204).send(null);
+    },
+  );
 };
 
 export default authRoutes;

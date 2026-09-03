@@ -1,9 +1,12 @@
 import cookie from "@fastify/cookie";
 import cors from "@fastify/cors";
 import rateLimit from "@fastify/rate-limit";
+import swagger from "@fastify/swagger";
+import swaggerUi from "@fastify/swagger-ui";
 import Fastify, { type FastifyError } from "fastify";
 import {
   hasZodFastifySchemaValidationErrors,
+  jsonSchemaTransform,
   serializerCompiler,
   validatorCompiler,
   type ZodTypeProvider,
@@ -55,6 +58,56 @@ export async function buildApp() {
     });
   });
 
+  // The spec is generated from the same Zod schemas the routes validate
+  // with, so the docs cannot drift from the actual behaviour.
+  await app.register(swagger, {
+    openapi: {
+      info: {
+        title: "HASA HASA API",
+        version: "0.1.0",
+        description: [
+          "Backend for the HASA HASA restaurant platform.",
+          "",
+          "**Authentication is passwordless.** Every sign-in is a two-step",
+          "exchange: request a code, then verify it. There are no passwords",
+          "to store or reset.",
+          "",
+          "**Restaurants are applications, not accounts.** Signing up creates",
+          "a PENDING restaurant that ops must approve before the dashboard",
+          "opens. Being signed in and being approved are separate: a PENDING",
+          "owner authenticates normally and `GET /auth/me` reports their",
+          "status, so the client can route them to a holding screen.",
+          "",
+          "**Sessions** are returned two ways. The web dashboard uses the",
+          "`HttpOnly` cookie set on verify; native clients send the same",
+          "token as `Authorization: Bearer <token>`.",
+        ].join("\n"),
+      },
+      servers: [{ url: `http://localhost:${env.PORT}`, description: "Local" }],
+      tags: [
+        { name: "Auth", description: "Passwordless sign-up and sign-in" },
+        {
+          name: "Admin",
+          description:
+            "Ops review queue. Answers 404 to non-admins rather than 403, so the surface does not confirm it exists.",
+        },
+        { name: "System", description: "Health and service metadata" },
+      ],
+      components: {
+        securitySchemes: {
+          bearerAuth: { type: "http", scheme: "bearer" },
+          cookieAuth: { type: "apiKey", in: "cookie", name: "hasahasa_session" },
+        },
+      },
+    },
+    transform: jsonSchemaTransform,
+  });
+
+  await app.register(swaggerUi, {
+    routePrefix: "/docs",
+    uiConfig: { docExpansion: "list", deepLinking: true },
+  });
+
   await app.register(cors, { origin: env.WEB_ORIGIN, credentials: true });
   await app.register(cookie);
 
@@ -63,11 +116,31 @@ export async function buildApp() {
 
   await app.register(authPlugin);
 
-  app.get("/health", async () => ({ ok: true }));
+  app.get(
+    "/health",
+    {
+      schema: {
+        tags: ["System"],
+        summary: "Liveness check",
+        description:
+          "Answers 200 as soon as the process is serving. Does not touch the database — it reports that the API is up, not that it is healthy end to end.",
+      },
+    },
+    async () => ({ ok: true }),
+  );
 
   // A bare GET / is what everyone tries first. Answering with the route list
   // beats a 404 that looks like the server is broken.
-  app.get("/", async () => ({
+  app.get(
+    "/",
+    {
+      schema: {
+        tags: ["System"],
+        summary: "Service index",
+        description: "The route list, for anyone who opens the API in a browser. Full documentation is at /docs.",
+      },
+    },
+    async () => ({
     service: "@hasahasa/api",
     status: "ok",
     endpoints: {
@@ -79,8 +152,10 @@ export async function buildApp() {
       reviewQueue: "GET /admin/restaurants?status=PENDING",
       approve: "POST /admin/restaurants/:id/approve",
       reject: "POST /admin/restaurants/:id/reject",
+      docs: "GET /docs",
     },
-  }));
+  }),
+  );
 
   await app.register(authRoutes);
   await app.register(adminRoutes);
