@@ -4,8 +4,11 @@ import { OTP_LENGTH } from "@hasahasa/shared";
 import { useEffect, useRef, useState } from "react";
 import { Field, inputClassName } from "@/components/auth/field";
 
-/** Seconds before "Resend code" becomes clickable again. */
-export const RESEND_SECONDS = 30;
+/**
+ * Seconds before "Resend code" becomes clickable again. Mirrors the API's
+ * own cooldown — offer the button sooner and the resend just returns 429.
+ */
+export const RESEND_SECONDS = 60;
 
 /** Ticks a cooldown down to zero; `start()` puts it back at the top. */
 export function useResendCountdown() {
@@ -19,7 +22,8 @@ export function useResendCountdown() {
 
   return {
     seconds,
-    start: () => setSeconds(RESEND_SECONDS),
+    // The API reports how long is actually left on a 429, so let it win.
+    start: (override?: number) => setSeconds(override ?? RESEND_SECONDS),
     reset: () => setSeconds(0),
   };
 }

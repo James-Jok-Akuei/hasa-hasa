@@ -1,0 +1,24 @@
+# Local Postgres for development.
+#   docker compose up -d
+# Port 5433 on purpose, so it does not fight a Postgres already on 5432.
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: hasahasa-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: hasahasa
+      POSTGRES_PASSWORD: hasahasa
+      POSTGRES_DB: hasahasa
+    ports:
+      - "5433:5432"
+    volumes:
+      - hasahasa-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hasahasa -d hasahasa"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  hasahasa-pgdata:
