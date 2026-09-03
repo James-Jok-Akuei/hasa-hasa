@@ -1,13 +1,17 @@
 "use client";
 
+import { authApi } from "@hasahasa/api-client";
 import {
   requestOtpSchema,
   verifyOtpSchema,
   type VerifyOtpInput,
 } from "@hasahasa/shared";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toFormState } from "@/components/auth/api-error";
 import { Field, inputClassName, SubmitButton } from "@/components/auth/field";
+import { FormError } from "@/components/auth/form-error";
 import { GoogleAuth } from "@/components/auth/google-button";
 import {
   OtpField,
@@ -29,7 +33,17 @@ export function LoginForm() {
   });
   const [errors, setErrors] = useState<FieldErrors>({});
   const [status, setStatus] = useState<Status>("idle");
+  const [formError, setFormError] = useState<string>();
   const resend = useResendCountdown();
+  const router = useRouter();
+
+  /** Routes a thrown API error to the field or the form line. */
+  function applyError(error: unknown) {
+    const next = toFormState(error);
+    setErrors(next.fieldErrors as FieldErrors);
+    setFormError(next.formError);
+    if (next.retryAfterSeconds) resend.start(next.retryAfterSeconds);
+  }
 
   function setValue(field: keyof VerifyOtpInput, value: string) {
     setValues((prev) => ({ ...prev, [field]: value }));
@@ -38,13 +52,23 @@ export function LoginForm() {
     }
   }
 
-  /** Fakes the "mail them a code" round trip and starts the cooldown. */
-  async function sendCode() {
+  /**
+   * Asks the API to mail a code. It answers the same way whether or not the
+   * address has an account, so this cannot be used to discover who signed up.
+   */
+  async function sendCode(): Promise<boolean> {
     setStatus("submitting");
-    // No backend yet — simulate the round trip so the flow feels real.
-    await new Promise((resolve) => setTimeout(resolve, 1200));
-    setStatus("idle");
-    resend.start();
+    setFormError(undefined);
+    try {
+      await authApi.requestLoginOtp({ email: values.email });
+      resend.start();
+      return true;
+    } catch (error) {
+      applyError(error);
+      return false;
+    } finally {
+      setStatus("idle");
+    }
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -64,24 +88,33 @@ export function LoginForm() {
     }
 
     setErrors({});
+    setFormError(undefined);
 
     if (step === "email") {
-      await sendCode();
-      setStep("code");
+      // Only advance if the code actually went out, otherwise the next screen
+      // asks for something that was never sent.
+      if (await sendCode()) setStep("code");
       return;
     }
 
     setStatus("submitting");
-    // No backend yet — simulate the round trip so the flow feels real.
-    await new Promise((resolve) => setTimeout(resolve, 1200));
-    setStatus("success");
-    setTimeout(() => setStatus("idle"), 2000);
+    try {
+      await authApi.loginVerify(values);
+      setStatus("success");
+      // Where they land depends on the restaurant's review status, which the
+      // holding screen reads from the session.
+      router.push("/pending");
+    } catch (error) {
+      applyError(error);
+      setStatus("idle");
+    }
   }
 
   /** Back to step one, so a typo in the address is one click from fixed. */
   function editEmail() {
     setValues((prev) => ({ ...prev, code: "" }));
     setErrors({});
+    setFormError(undefined);
     resend.reset();
     setStep("email");
   }
@@ -131,6 +164,8 @@ export function LoginForm() {
           />
         )}
       </div>
+
+      <FormError message={formError} />
 
       <SubmitButton
         status={status}

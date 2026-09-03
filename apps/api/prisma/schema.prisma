@@ -1,0 +1,127 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// A restaurant is a pending application until an admin approves it.
+/// Signing up never grants dashboard access on its own.
+enum RestaurantStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+/// Role within a single restaurant. Platform-level admin is separate,
+/// see User.isPlatformAdmin.
+enum MemberRole {
+  OWNER
+  MANAGER
+  STAFF
+}
+
+/// Why a one-time code was issued. A signup code must not be usable to
+/// log into an existing account, and vice versa.
+enum OtpPurpose {
+  SIGNUP
+  LOGIN
+}
+
+model User {
+  id    String  @id @default(cuid())
+  email String  @unique
+  phone String?
+  name  String?
+
+  /// Ops staff who review restaurant applications. Deliberately not a
+  /// Membership role: platform admins belong to no restaurant.
+  isPlatformAdmin Boolean @default(false)
+
+  memberships Membership[]
+  sessions    Session[]
+  reviewed    Restaurant[] @relation("ReviewedBy")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+}
+
+model Restaurant {
+  id     String           @id @default(cuid())
+  name   String
+  status RestaurantStatus @default(PENDING)
+
+  contactEmail String
+  contactPhone String
+
+  /// Audit trail for the approval decision. Who approved a merchant and
+  /// when is a question that gets asked after something goes wrong.
+  reviewedAt      DateTime?
+  reviewedById    String?
+  reviewedBy      User?     @relation("ReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  rejectionReason String?
+
+  memberships Membership[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+}
+
+model Membership {
+  id           String     @id @default(cuid())
+  userId       String
+  restaurantId String
+  role         MemberRole @default(OWNER)
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, restaurantId])
+  @@index([restaurantId])
+}
+
+/// One-time codes are stored hashed, never in plaintext — a database dump
+/// must not hand over live login codes.
+model OtpCode {
+  id       String     @id @default(cuid())
+  email    String
+  codeHash String
+  purpose  OtpPurpose
+
+  /// Signup carries the application details until the code is verified,
+  /// so an unverified signup creates no Restaurant row.
+  payload Json?
+
+  expiresAt  DateTime
+  consumedAt DateTime?
+  attempts   Int       @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@index([email, purpose, expiresAt])
+}
+
+/// Sessions are opaque tokens hashed at rest. Mobile clients send them as
+/// bearer tokens, the dashboard as a cookie.
+model Session {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
