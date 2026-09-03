@@ -11,6 +11,7 @@ import {
   validatorCompiler,
   type ZodTypeProvider,
 } from "fastify-type-provider-zod";
+import { isAllowedOrigin } from "./lib/cors.js";
 import { env, isProduction } from "./lib/env.js";
 import adminRoutes from "./modules/admin/routes.js";
 import authRoutes from "./modules/auth/routes.js";
@@ -108,7 +109,14 @@ export async function buildApp() {
     uiConfig: { docExpansion: "list", deepLinking: true },
   });
 
-  await app.register(cors, { origin: env.WEB_ORIGIN, credentials: true });
+  await app.register(cors, {
+    origin: (origin, callback) => {
+      // Reject by not allowing the origin, rather than by erroring — an error
+      // here produces a 500 where the browser expects a plain CORS refusal.
+      callback(null, isAllowedOrigin(origin));
+    },
+    credentials: true,
+  });
   await app.register(cookie);
 
   // Blunt global ceiling. The OTP endpoints carry their own tighter limits.

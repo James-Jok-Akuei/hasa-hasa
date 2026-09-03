@@ -55,6 +55,7 @@ const authRoutes: FastifyPluginAsyncZod = async (app) => {
           400: errorResponse.describe("Validation failed"),
           409: errorResponse.describe("An account already exists for this email"),
           429: errorResponse.describe("Cooldown — see retryAfterSeconds"),
+          502: errorResponse.describe("The email could not be sent — safe to retry immediately"),
         },
       },
     },
@@ -75,7 +76,8 @@ const authRoutes: FastifyPluginAsyncZod = async (app) => {
         await issueOtp(body.email, "SIGNUP", body);
       } catch (error) {
         if (error instanceof OtpError) {
-          return reply.code(429).send({
+          request.log.warn({ err: error, code: error.code }, "signup otp failed");
+          return reply.code(error.code === "COOLDOWN" ? 429 : 502).send({
             error: error.code,
             message: error.message,
             retryAfterSeconds: error.retryAfterSeconds,
@@ -184,6 +186,7 @@ const authRoutes: FastifyPluginAsyncZod = async (app) => {
           202: otpSentResponse.describe("Answered identically for unknown addresses"),
           400: errorResponse.describe("Validation failed"),
           429: errorResponse.describe("Cooldown — see retryAfterSeconds"),
+          502: errorResponse.describe("The email could not be sent — safe to retry immediately"),
         },
       },
     },
@@ -196,8 +199,9 @@ const authRoutes: FastifyPluginAsyncZod = async (app) => {
         try {
           await issueOtp(user.email, "LOGIN");
         } catch (error) {
-          if (error instanceof OtpError && error.code === "COOLDOWN") {
-            return reply.code(429).send({
+          if (error instanceof OtpError) {
+            request.log.warn({ err: error, code: error.code }, "login otp failed");
+            return reply.code(error.code === "COOLDOWN" ? 429 : 502).send({
               error: error.code,
               message: error.message,
               retryAfterSeconds: error.retryAfterSeconds,
