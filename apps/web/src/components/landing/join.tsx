@@ -1,4 +1,8 @@
+import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
+import orderIllustration from "@/app/assets/images/landing/il-join-order.svg";
+import rideIllustration from "@/app/assets/images/landing/il-join-ride.svg";
+import sellIllustration from "@/app/assets/images/landing/il-join-sell.svg";
 
 /**
  * Where the nav's "Get started" lands. Three doors, because by this point in
@@ -7,6 +11,9 @@ import Link from "next/link";
  *
  * Two of the three are real destinations today. Ordering waits on the app,
  * and says so rather than looking broken.
+ *
+ * The illustrations sit on light panels: unDraw draws hair and clothing in
+ * near-black, which would disappear against this section's background.
  */
 
 type Door = {
@@ -16,6 +23,8 @@ type Door = {
   href: string;
   icon: React.ReactNode;
   cta: string;
+  illustration: StaticImageData;
+  illustrationAlt: string;
   /** Renders muted, with the CTA reading as a status instead of an action. */
   pending?: boolean;
 };
@@ -27,6 +36,8 @@ const DOORS: Door[] = [
     body: "Browse menus, pay with MoMo or cash, and have it delivered or ready to collect.",
     href: "#download",
     icon: <BagIcon />,
+    illustration: orderIllustration,
+    illustrationAlt: "Two people sharing a meal at a table",
     cta: "App coming soon",
     pending: true,
   },
@@ -36,6 +47,8 @@ const DOORS: Door[] = [
     body: "Take orders from your phone. Set up your menu in minutes and start the same day you are approved.",
     href: "/signup",
     icon: <StoreIcon />,
+    illustration: sellIllustration,
+    illustrationAlt: "A street food kitchen serving customers",
     cta: "List your restaurant",
   },
   {
@@ -44,6 +57,8 @@ const DOORS: Door[] = [
     body: "Pick up from kitchens near you, choose the jobs that suit you, and get paid to MoMo.",
     href: "/riders",
     icon: <BikeIcon />,
+    illustration: rideIllustration,
+    illustrationAlt: "A delivery rider on a scooter with a food box",
     cta: "Apply to ride",
   },
 ];
@@ -68,60 +83,79 @@ export function Join() {
           <article
             key={door.label}
             style={{ animationDelay: `${i * 90}ms` }}
-            className={`group relative flex animate-fade-up flex-col rounded-[1.75rem] border p-8 transition-all duration-500 ease-out motion-reduce:transform-none ${
+            className={`group relative flex animate-fade-up flex-col overflow-hidden rounded-[1.75rem] border transition-all duration-500 ease-out motion-reduce:transform-none ${
               door.pending
                 ? "border-white/[0.08] bg-white/[0.015]"
                 : "border-white/10 bg-white/[0.03] hover:-translate-y-1.5 hover:border-brand-500/60"
             }`}
           >
-            <span
-              className={`flex size-14 items-center justify-center rounded-2xl transition-transform duration-500 ease-out motion-reduce:transform-none ${
-                door.pending
-                  ? "bg-white/[0.06] text-white/35"
-                  : "bg-linear-to-br from-brand-400 to-brand-600 text-white shadow-[0_10px_24px_-10px_rgba(255,109,47,0.95)] group-hover:-rotate-6 group-hover:scale-105"
+            <div
+              className={`flex h-40 w-full items-end justify-center px-8 pt-7 ${
+                door.pending ? "bg-brand-50/50" : "bg-brand-50"
               }`}
             >
-              {door.icon}
-            </span>
+              <Image
+                src={door.illustration}
+                alt={door.illustrationAlt}
+                sizes="(min-width: 768px) 33vw, 100vw"
+                className={`h-full w-auto max-w-full object-contain transition-all duration-500 ease-out motion-reduce:transform-none ${
+                  door.pending
+                    ? "opacity-55 saturate-50"
+                    : "group-hover:-translate-y-1"
+                }`}
+              />
+            </div>
 
-            <p
-              className={`mt-6 text-[0.6rem] font-extrabold uppercase tracking-[0.25em] ${
-                door.pending ? "text-white/30" : "text-brand-300"
-              }`}
-            >
-              {door.label}
-            </p>
-            <h3
-              className={`mt-3 font-heading text-xl font-extrabold tracking-[-0.01em] ${
-                door.pending ? "text-white/45" : "text-white"
-              }`}
-            >
-              {door.title}
-            </h3>
-            <p
-              className={`mt-2.5 text-sm leading-relaxed ${
-                door.pending ? "text-white/30" : "text-white/60"
-              }`}
-            >
-              {door.body}
-            </p>
+            <div className="flex grow flex-col p-8">
+              <span
+                className={`flex size-14 items-center justify-center rounded-2xl transition-transform duration-500 ease-out motion-reduce:transform-none ${
+                  door.pending
+                    ? "bg-white/[0.06] text-white/35"
+                    : "bg-linear-to-br from-brand-400 to-brand-600 text-white shadow-[0_10px_24px_-10px_rgba(255,109,47,0.95)] group-hover:-rotate-6 group-hover:scale-105"
+                }`}
+              >
+                {door.icon}
+              </span>
 
-            <div className="mt-8 flex grow items-end">
-              {door.pending ? (
-                /* Not a link: there is nowhere to go yet, and a button that
+              <p
+                className={`mt-6 text-[0.6rem] font-extrabold uppercase tracking-[0.25em] ${
+                  door.pending ? "text-white/30" : "text-brand-300"
+                }`}
+              >
+                {door.label}
+              </p>
+              <h3
+                className={`mt-3 font-heading text-xl font-extrabold tracking-[-0.01em] ${
+                  door.pending ? "text-white/45" : "text-white"
+                }`}
+              >
+                {door.title}
+              </h3>
+              <p
+                className={`mt-2.5 text-sm leading-relaxed ${
+                  door.pending ? "text-white/30" : "text-white/60"
+                }`}
+              >
+                {door.body}
+              </p>
+
+              <div className="mt-8 flex grow items-end">
+                {door.pending ? (
+                  /* Not a link: there is nowhere to go yet, and a button that
                    does nothing is worse than a label that explains. */
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 px-5 py-2.5 text-[0.65rem] font-bold uppercase tracking-[0.18em] text-white/35">
-                  {door.cta}
-                </span>
-              ) : (
-                <Link
-                  href={door.href}
-                  className="inline-flex items-center gap-2.5 text-xs font-bold uppercase tracking-[0.18em] text-white transition-colors duration-300 hover:text-brand-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 focus-visible:ring-offset-4 focus-visible:ring-offset-neutral-950"
-                >
-                  {door.cta}
-                  <ArrowIcon />
-                </Link>
-              )}
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/10 px-5 py-2.5 text-[0.65rem] font-bold uppercase tracking-[0.18em] text-white/35">
+                    {door.cta}
+                  </span>
+                ) : (
+                  <Link
+                    href={door.href}
+                    className="inline-flex items-center gap-2.5 text-xs font-bold uppercase tracking-[0.18em] text-white transition-colors duration-300 hover:text-brand-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 focus-visible:ring-offset-4 focus-visible:ring-offset-neutral-950"
+                  >
+                    {door.cta}
+                    <ArrowIcon />
+                  </Link>
+                )}
+              </div>
             </div>
 
             {/* Accent rule drawing itself across on hover */}

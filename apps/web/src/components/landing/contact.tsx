@@ -11,8 +11,8 @@ import contactIllustration from "@/app/assets/images/landing/il-contact.svg";
  * channels with a value are rendered, so partial is fine.
  */
 const CONTACT = {
-  whatsapp: "",
-  phone: "",
+  whatsapp: "+211 925 903 077",
+  phone: "+211 925 903 077",
   email: "",
 };
 
