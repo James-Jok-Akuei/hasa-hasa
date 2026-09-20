@@ -34,6 +34,8 @@ export function LoginForm() {
   const [errors, setErrors] = useState<FieldErrors>({});
   const [status, setStatus] = useState<Status>("idle");
   const [formError, setFormError] = useState<string>();
+  /** Set when the address has no account, so we can offer signup inline. */
+  const [unregistered, setUnregistered] = useState(false);
   const resend = useResendCountdown();
   const router = useRouter();
 
@@ -41,8 +43,15 @@ export function LoginForm() {
   function applyError(error: unknown) {
     const next = toFormState(error);
     setErrors(next.fieldErrors as FieldErrors);
+    setUnregistered(next.errorCode === "EMAIL_NOT_REGISTERED");
     setFormError(next.formError);
     if (next.retryAfterSeconds) resend.start(next.retryAfterSeconds);
+  }
+
+  /** Clears whatever the last attempt left on screen. */
+  function clearFormError() {
+    setFormError(undefined);
+    setUnregistered(false);
   }
 
   function setValue(field: keyof VerifyOtpInput, value: string) {
@@ -53,12 +62,13 @@ export function LoginForm() {
   }
 
   /**
-   * Asks the API to mail a code. It answers the same way whether or not the
-   * address has an account, so this cannot be used to discover who signed up.
+   * Asks the API to mail a code. An address with no account comes back as
+   * EMAIL_NOT_REGISTERED, which `applyError` turns into the signup prompt
+   * rather than advancing to a code screen nothing was sent for.
    */
   async function sendCode(): Promise<boolean> {
     setStatus("submitting");
-    setFormError(undefined);
+    clearFormError();
     try {
       await authApi.requestLoginOtp({ email: values.email });
       resend.start();
@@ -88,7 +98,7 @@ export function LoginForm() {
     }
 
     setErrors({});
-    setFormError(undefined);
+    clearFormError();
 
     if (step === "email") {
       // Only advance if the code actually went out, otherwise the next screen
@@ -114,7 +124,7 @@ export function LoginForm() {
   function editEmail() {
     setValues((prev) => ({ ...prev, code: "" }));
     setErrors({});
-    setFormError(undefined);
+    clearFormError();
     resend.reset();
     setStep("email");
   }
@@ -165,7 +175,24 @@ export function LoginForm() {
         )}
       </div>
 
-      <FormError message={formError} />
+      {unregistered ? (
+        /* Not a plain error: the way out is signup, so the link is the point. */
+        <p
+          role="alert"
+          className="mt-6 text-center text-xs leading-relaxed tracking-wider text-white/70"
+        >
+          <span className="text-red-300">{formError}</span>
+          <br />
+          <Link
+            href="/signup"
+            className="mt-1 inline-block font-semibold uppercase tracking-[0.25em] text-brand-300 underline-offset-4 transition-colors hover:text-brand-200 hover:underline"
+          >
+            Sign up instead
+          </Link>
+        </p>
+      ) : (
+        <FormError message={formError} />
+      )}
 
       <SubmitButton
         status={status}

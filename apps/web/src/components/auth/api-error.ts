@@ -3,6 +3,8 @@ import { ApiError, NetworkError } from "@hasahasa/api-client";
 export interface FormState {
   fieldErrors: Record<string, string>;
   formError?: string;
+  /** The API's machine-readable code, so a form can special-case one. */
+  errorCode?: string;
   /** Present on a 429, so the resend countdown can show the real wait. */
   retryAfterSeconds?: number;
 }
@@ -19,6 +21,7 @@ export function toFormState(error: unknown): FormState {
       fieldErrors,
       // A message shown twice reads like two separate problems.
       formError: Object.keys(fieldErrors).length ? undefined : error.message,
+      errorCode: error.code,
       retryAfterSeconds: error.retryAfterSeconds,
     };
   }

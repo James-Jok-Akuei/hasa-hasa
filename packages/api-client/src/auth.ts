@@ -21,7 +21,7 @@ export const authApi = {
       body: input,
     }),
 
-  /** Step one of login. Answers the same whether or not the account exists. */
+  /** Step one of login. Throws EMAIL_NOT_REGISTERED (404) for unknown addresses. */
   requestLoginOtp: (input: RequestOtpInput) =>
     request<{ sent: true }>("/auth/login", { method: "POST", body: input }),
 
