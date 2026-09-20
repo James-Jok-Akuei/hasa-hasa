@@ -5,6 +5,7 @@ import { StoreBadges, storesAreLive } from "@/components/landing/store-badges";
 import facebookLogo from "@/app/assets/images/landing/logo-facebook.svg";
 import instagramLogo from "@/app/assets/images/landing/logo-instagram.svg";
 import whatsappLogo from "@/app/assets/images/landing/logo-whatsapp.svg";
+import sspNote from "@/app/assets/images/landing/cash-ssp-note.jpg";
 
 /**
  * Fill these in and each icon appears. Empty ones are left out rather than
@@ -37,7 +38,7 @@ const PAYMENTS = [
     detail: "MTN Mobile Money",
     wordmark: true,
   },
-  { name: "Cash", detail: "On delivery" },
+  { name: "Cash", detail: "South Sudanese pounds, on delivery" },
 ];
 
 /** Only routes and anchors that exist. Legal pages are not written yet. */
@@ -146,9 +147,11 @@ export function SiteFooter() {
                     MoMo
                   </span>
                 ) : (
-                  <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white text-brand-600">
-                    <CashIcon />
-                  </span>
+                  <Image
+                    src={sspNote}
+                    alt="A one South Sudanese pound note"
+                    className="h-9 w-[4.5rem] shrink-0 rounded-lg object-cover ring-1 ring-black/10"
+                  />
                 )}
                 <span className="leading-tight">
                   <span className="block text-sm font-bold">{method.name}</span>
@@ -203,26 +206,21 @@ export function SiteFooter() {
         <p className="text-xs text-white/70">
           © {new Date().getFullYear()} HASA HASA. All rights reserved.
         </p>
+        {/* The banknote photograph is CC BY-SA 4.0, which obliges us to name
+            the photographer and the licence wherever we show it. */}
+        <p className="mt-2 text-[0.65rem] text-white/45">
+          Banknote photograph by Hispalois,{" "}
+          <a
+            href="https://creativecommons.org/licenses/by-sa/4.0/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-2 transition-colors hover:text-white/70"
+          >
+            CC BY-SA 4.0
+          </a>
+        </p>
       </div>
     </footer>
-  );
-}
-
-function CashIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="size-5"
-      aria-hidden
-    >
-      <rect x="2.5" y="6" width="19" height="12" rx="2.5" />
-      <circle cx="12" cy="12" r="2.6" />
-    </svg>
   );
 }
 
