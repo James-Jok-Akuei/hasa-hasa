@@ -4,6 +4,8 @@ import Link from "next/link";
 import { SiteNav } from "@/components/landing/site-nav";
 import { RiderForm } from "@/components/riders/rider-form";
 import riderPhoto from "@/app/assets/images/other/hero-boxes.png";
+import riderIllustration from "@/app/assets/images/riderImages/rider-illustration.png";
+import staffPhoto from "@/app/assets/images/riderImages/staff-explaining.jpg";
 
 export const metadata: Metadata = {
   title: "Ride with HASA HASA — deliver across Juba",
@@ -40,6 +42,13 @@ const REQUIREMENTS = [
     body: "That is where your earnings land, so it needs to be registered in your name.",
     icon: <WalletIcon />,
   },
+];
+
+const JOINING = [
+  "Fill in the form — name, phone, and where in Juba you ride.",
+  "We call you back and answer whatever you want to ask.",
+  "Bring your bike and your MoMo number, and we set you up on the app.",
+  "Go online and take your first delivery.",
 ];
 
 const DAY = [
@@ -148,34 +157,97 @@ export default function RidersPage() {
         </ul>
       </section>
 
+      {/* Joining — the staff photo does the reassuring here: a real person
+          walks you through it, which is the thing riders actually worry about */}
+      <section className="bg-white px-6 py-20 lg:px-[5.5%] lg:py-24">
+        <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+          <div className="relative aspect-4/3 overflow-hidden rounded-[2rem] shadow-[0_30px_70px_-40px_rgba(0,0,0,0.7)]">
+            <Image
+              src={staffPhoto}
+              alt="A member of the HASA HASA team showing the rider app on a phone"
+              fill
+              placeholder="blur"
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              className="object-cover"
+            />
+          </div>
+
+          <div>
+            <p className="text-[0.65rem] font-bold uppercase tracking-[0.35em] text-brand-600">
+              Joining
+            </p>
+            <h2 className="mt-3 font-heading text-3xl font-extrabold leading-[1.12] tracking-[-0.02em] text-neutral-900 sm:text-[2.4rem]">
+              Someone walks you through it.
+            </h2>
+            <p className="mt-4 max-w-md text-sm leading-relaxed text-neutral-600 sm:text-base">
+              Send the form below and we call you back. We go through how the
+              app works, what a delivery pays and how your MoMo payouts run —
+              and you ask whatever you want before deciding.
+            </p>
+            <ol className="mt-8 flex flex-col gap-4">
+              {JOINING.map((step, i) => (
+                <li key={step} className="flex items-start gap-4">
+                  <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-brand-500 text-[0.7rem] font-extrabold text-white">
+                    {i + 1}
+                  </span>
+                  <span className="text-sm leading-relaxed text-neutral-700">
+                    {step}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      </section>
+
       {/* How the day runs */}
       <section className="bg-neutral-950 px-6 py-20 lg:px-[5.5%] lg:py-24">
-        <p className="text-[0.65rem] font-bold uppercase tracking-[0.35em] text-brand-300">
-          How the day runs
-        </p>
-        <h2 className="mt-3 max-w-xl font-heading text-3xl font-extrabold leading-[1.12] tracking-[-0.02em] text-white sm:text-[2.4rem]">
-          Online when you want to be.
-        </h2>
+        <div className="grid gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:gap-16">
+          {/* The illustration carries this band — the steps beside it are
+              instructions, and a photograph would fight them for attention */}
+          <div className="relative mx-auto w-full max-w-sm lg:max-w-none">
+            <span
+              aria-hidden
+              className="absolute inset-0 -z-10 rounded-full bg-brand-500/20 blur-[90px]"
+            />
+            <Image
+              src={riderIllustration}
+              alt="A delivery rider on a scooter checking the route on a phone"
+              placeholder="blur"
+              sizes="(min-width: 1024px) 35vw, 80vw"
+              className="h-auto w-full"
+            />
+          </div>
 
-        <ol className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4 lg:gap-7">
-          {DAY.map((step, i) => (
-            <li
-              key={step.title}
-              style={{ animationDelay: `${i * 80}ms` }}
-              className="relative animate-fade-up rounded-[1.75rem] border border-white/10 bg-white/[0.03] p-7 transition-colors duration-500 hover:border-white/25"
-            >
-              <span className="text-[0.6rem] font-extrabold uppercase tracking-[0.25em] text-brand-300">
-                Step {i + 1}
-              </span>
-              <h3 className="mt-4 font-heading text-lg font-extrabold tracking-[-0.01em] text-white">
-                {step.title}
-              </h3>
-              <p className="mt-2.5 text-sm leading-relaxed text-white/60">
-                {step.body}
-              </p>
-            </li>
-          ))}
-        </ol>
+          <div>
+            <p className="text-[0.65rem] font-bold uppercase tracking-[0.35em] text-brand-300">
+              How the day runs
+            </p>
+            <h2 className="mt-3 max-w-xl font-heading text-3xl font-extrabold leading-[1.12] tracking-[-0.02em] text-white sm:text-[2.4rem]">
+              Online when you want to be.
+            </h2>
+
+            <ol className="mt-10 grid gap-6 sm:grid-cols-2">
+              {DAY.map((step, i) => (
+                <li
+                  key={step.title}
+                  style={{ animationDelay: `${i * 80}ms` }}
+                  className="relative animate-fade-up rounded-[1.75rem] border border-white/10 bg-white/[0.03] p-6 transition-colors duration-500 hover:border-white/25"
+                >
+                  <span className="text-[0.6rem] font-extrabold uppercase tracking-[0.25em] text-brand-300">
+                    Step {i + 1}
+                  </span>
+                  <h3 className="mt-3 font-heading text-lg font-extrabold tracking-[-0.01em] text-white">
+                    {step.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-white/60">
+                    {step.body}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
       </section>
 
       {/* The form */}
