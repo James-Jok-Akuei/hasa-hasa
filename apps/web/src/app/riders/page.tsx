@@ -3,9 +3,23 @@ import Image from "next/image";
 import Link from "next/link";
 import { SiteNav } from "@/components/landing/site-nav";
 import { RiderForm } from "@/components/riders/rider-form";
-import riderPhoto from "@/app/assets/images/other/hero-boxes.png";
 import riderIllustration from "@/app/assets/images/riderImages/rider-illustration.png";
 import staffPhoto from "@/app/assets/images/riderImages/staff-explaining.jpg";
+import heroPhoto from "@/app/assets/images/riderImages/rider-hero.jpg";
+import momoPhoto from "@/app/assets/images/riderImages/req-momo.jpg";
+import motorbikePhoto from "@/app/assets/images/riderImages/req-motorbike.jpg";
+import smartphonePhoto from "@/app/assets/images/riderImages/req-smartphone.jpg";
+import streetsPhoto from "@/app/assets/images/riderImages/req-streets.jpg";
+
+/**
+ * Stock photography here is from Unsplash, whose licence allows commercial
+ * use without attribution. Source ids, so a swap is traceable:
+ *   rider-hero      photo-1667844141292-0754524d5897
+ *   req-motorbike   photo-1551356522-050fbef473bf   (Kampala)
+ *   req-smartphone  photo-1528123778681-01e39b42808e
+ *   req-streets     photo-1715250670734-ccd0fb7947f8
+ *   req-momo        photo-1672079806540-6791a00ce239
+ */
 
 export const metadata: Metadata = {
   title: "Ride with HASA HASA — deliver across Juba",
@@ -26,21 +40,29 @@ const REQUIREMENTS = [
     title: "A motorbike you can ride",
     body: "Yours or one you have regular use of. Bicycles work for short central runs.",
     icon: <BikeIcon />,
+    photo: motorbikePhoto,
+    photoAlt: "A rider waiting on his motorbike at the roadside",
   },
   {
     title: "A smartphone",
     body: "Orders reach you in the app, so you need something that can run it and stay online.",
     icon: <PhoneIcon />,
+    photo: smartphonePhoto,
+    photoAlt: "A young man smiling at his smartphone",
   },
   {
     title: "You know Juba",
     body: "Street names help, but knowing how to find a compound without them helps more.",
     icon: <MapIcon />,
+    photo: streetsPhoto,
+    photoAlt: "Motorbikes in traffic seen in a car's side mirror",
   },
   {
     title: "An MTN MoMo number",
     body: "That is where your earnings land, so it needs to be registered in your name.",
     icon: <WalletIcon />,
+    photo: momoPhoto,
+    photoAlt: "Mobile money kiosks lining a busy market street",
   },
 ];
 
@@ -79,13 +101,13 @@ export default function RidersPage() {
       <section className="relative overflow-hidden">
         <div className="absolute inset-0">
           <Image
-            src={riderPhoto}
+            src={heroPhoto}
             alt=""
             fill
             priority
             placeholder="blur"
             sizes="100vw"
-            className="object-cover"
+            className="object-cover object-center"
           />
           <span
             aria-hidden
@@ -141,17 +163,35 @@ export default function RidersPage() {
             <li
               key={item.title}
               style={{ animationDelay: `${i * 80}ms` }}
-              className="group animate-fade-up rounded-[1.75rem] bg-white p-7 shadow-[0_2px_4px_-2px_rgba(0,0,0,0.12),0_20px_46px_-28px_rgba(0,0,0,0.5)] transition-all duration-500 ease-out hover:-translate-y-1.5 motion-reduce:transform-none"
+              className="group flex animate-fade-up flex-col overflow-hidden rounded-[1.75rem] bg-white shadow-[0_2px_4px_-2px_rgba(0,0,0,0.12),0_20px_46px_-28px_rgba(0,0,0,0.5)] transition-all duration-500 ease-out hover:-translate-y-1.5 motion-reduce:transform-none"
             >
-              <span className="flex size-14 items-center justify-center rounded-2xl bg-linear-to-br from-brand-400 to-brand-600 text-white shadow-[0_10px_24px_-10px_rgba(255,109,47,0.95)] transition-transform duration-500 ease-out group-hover:-rotate-6 group-hover:scale-105 motion-reduce:transform-none">
-                {item.icon}
-              </span>
-              <h3 className="mt-6 font-heading text-lg font-extrabold tracking-[-0.01em] text-neutral-900">
-                {item.title}
-              </h3>
-              <p className="mt-2.5 text-sm leading-relaxed text-neutral-600">
-                {item.body}
-              </p>
+              {/* Photo band with the icon tile straddling its lower edge */}
+              <div className="relative h-40 w-full overflow-hidden">
+                <Image
+                  src={item.photo}
+                  alt={item.photoAlt}
+                  fill
+                  placeholder="blur"
+                  sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-105 motion-reduce:transform-none"
+                />
+                <span
+                  aria-hidden
+                  className="absolute inset-0 bg-linear-to-t from-black/45 to-transparent"
+                />
+              </div>
+
+              <div className="relative flex grow flex-col p-7">
+                <span className="absolute -top-7 left-7 flex size-14 items-center justify-center rounded-2xl bg-linear-to-br from-brand-400 to-brand-600 text-white shadow-[0_10px_24px_-10px_rgba(255,109,47,0.95)] transition-transform duration-500 ease-out group-hover:-rotate-6 group-hover:scale-105 motion-reduce:transform-none">
+                  {item.icon}
+                </span>
+                <h3 className="mt-9 font-heading text-lg font-extrabold tracking-[-0.01em] text-neutral-900">
+                  {item.title}
+                </h3>
+                <p className="mt-2.5 text-sm leading-relaxed text-neutral-600">
+                  {item.body}
+                </p>
+              </div>
             </li>
           ))}
         </ul>
