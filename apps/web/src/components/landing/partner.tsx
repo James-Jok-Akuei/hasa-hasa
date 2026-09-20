@@ -54,7 +54,7 @@ const TRACKS: Track[] = [
       "Deliveries near you, routed to your phone",
       "Earnings paid straight to MTN MoMo",
     ],
-    cta: { label: "Ride with us", href: "#contact" },
+    cta: { label: "Ride with us", href: "/riders" },
     icon: <HelmetIcon />,
     photo: riderPhoto,
     photoAlt:
