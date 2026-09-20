@@ -45,7 +45,7 @@ export function Contact() {
           </p>
 
           {primary ? (
-            <div className="mt-10 max-w-md overflow-hidden rounded-[1.75rem] bg-white shadow-[0_2px_4px_-2px_rgba(0,0,0,0.12),0_30px_60px_-30px_rgba(0,0,0,0.55)]">
+            <div className="mt-10 max-w-md animate-float overflow-hidden rounded-[1.75rem] bg-white shadow-[0_2px_4px_-2px_rgba(0,0,0,0.12),0_30px_60px_-30px_rgba(0,0,0,0.55)] hover:[animation-play-state:paused] motion-reduce:animate-none">
               <div className="p-7 sm:p-8">
                 <p className="text-[0.6rem] font-extrabold uppercase tracking-[0.25em] text-neutral-400">
                   Call or message
@@ -85,7 +85,9 @@ export function Contact() {
                       href={`tel:${dial(phone)}`}
                       className="flex flex-1 items-center justify-center gap-2.5 rounded-full border-2 border-neutral-900 px-6 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-neutral-900 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-neutral-900 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2 active:translate-y-0 motion-reduce:transform-none"
                     >
-                      <PhoneIcon />
+                      <span className="animate-ring motion-reduce:animate-none">
+                        <PhoneIcon />
+                      </span>
                       Call
                     </a>
                   ) : null}
