@@ -5,20 +5,22 @@ import { SiteNav } from "@/components/landing/site-nav";
 import { RiderForm } from "@/components/riders/rider-form";
 import riderIllustration from "@/app/assets/images/riderImages/rider-illustration.png";
 import staffPhoto from "@/app/assets/images/riderImages/staff-explaining.jpg";
-import heroPhoto from "@/app/assets/images/riderImages/rider-hero.jpg";
-import momoPhoto from "@/app/assets/images/riderImages/req-momo.jpg";
-import motorbikePhoto from "@/app/assets/images/riderImages/req-motorbike.jpg";
-import smartphonePhoto from "@/app/assets/images/riderImages/req-smartphone.jpg";
-import streetsPhoto from "@/app/assets/images/riderImages/req-streets.jpg";
+import heroIllustration from "@/app/assets/images/riderImages/il-hero-deliveries.svg";
+import momoIllustration from "@/app/assets/images/riderImages/il-momo.svg";
+import motorbikeIllustration from "@/app/assets/images/riderImages/il-motorbike.svg";
+import smartphoneIllustration from "@/app/assets/images/riderImages/il-smartphone.svg";
+import streetsIllustration from "@/app/assets/images/riderImages/il-streets.svg";
 
 /**
- * Stock photography here is from Unsplash, whose licence allows commercial
- * use without attribution. Source ids, so a swap is traceable:
- *   rider-hero      photo-1667844141292-0754524d5897
- *   req-motorbike   photo-1551356522-050fbef473bf   (Kampala)
- *   req-smartphone  photo-1528123778681-01e39b42808e
- *   req-streets     photo-1715250670734-ccd0fb7947f8
- *   req-momo        photo-1672079806540-6791a00ce239
+ * The illustrations are unDraw, whose licence allows commercial use with no
+ * attribution. Each was recoloured from unDraw's purple (#6c63ff) to the
+ * brand orange, so they read as ours rather than as stock. Source slugs, so
+ * any of them can be traced or swapped:
+ *   il-hero-deliveries  deliveries_qutl
+ *   il-motorbike        on-the-way_zwi3
+ *   il-smartphone       order-food_c92i
+ *   il-streets          finding-the-way_qp1z
+ *   il-momo             mobile-payments_uate
  */
 
 export const metadata: Metadata = {
@@ -40,29 +42,30 @@ const REQUIREMENTS = [
     title: "A motorbike you can ride",
     body: "Yours or one you have regular use of. Bicycles work for short central runs.",
     icon: <BikeIcon />,
-    photo: motorbikePhoto,
-    photoAlt: "A rider waiting on his motorbike at the roadside",
+    illustration: motorbikeIllustration,
+    illustrationAlt:
+      "A delivery rider on a scooter with a food box on the back",
   },
   {
     title: "A smartphone",
     body: "Orders reach you in the app, so you need something that can run it and stay online.",
     icon: <PhoneIcon />,
-    photo: smartphonePhoto,
-    photoAlt: "A young man smiling at his smartphone",
+    illustration: smartphoneIllustration,
+    illustrationAlt: "A food ordering app open on a phone",
   },
   {
     title: "You know Juba",
     body: "Street names help, but knowing how to find a compound without them helps more.",
     icon: <MapIcon />,
-    photo: streetsPhoto,
-    photoAlt: "Motorbikes in traffic seen in a car's side mirror",
+    illustration: streetsIllustration,
+    illustrationAlt: "Someone reading a map with a location pin above it",
   },
   {
     title: "An MTN MoMo number",
     body: "That is where your earnings land, so it needs to be registered in your name.",
     icon: <WalletIcon />,
-    photo: momoPhoto,
-    photoAlt: "Mobile money kiosks lining a busy market street",
+    illustration: momoIllustration,
+    illustrationAlt: "Payment confirmations arriving on a phone",
   },
 ];
 
@@ -97,54 +100,56 @@ export default function RidersPage() {
     <main className="flex min-h-dvh flex-col bg-brand-500 font-body">
       <SiteNav />
 
-      {/* Hero — photo behind, copy over it */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0">
-          <Image
-            src={heroPhoto}
-            alt=""
-            fill
-            priority
-            placeholder="blur"
-            sizes="100vw"
-            className="object-cover object-center"
-          />
-          <span
-            aria-hidden
-            className="absolute inset-0 bg-linear-to-b from-neutral-950/85 via-neutral-950/70 to-neutral-950/90"
-          />
-        </div>
+      {/* Hero — illustration beside the copy, not behind it. A transparent
+          SVG cannot carry a full-bleed background the way a photo did. */}
+      <section className="relative overflow-hidden bg-neutral-950">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -top-32 right-0 size-[34rem] rounded-full bg-brand-500/20 blur-[130px]"
+        />
 
-        <div className="relative px-6 py-20 lg:px-[5.5%] lg:py-28">
-          <p className="animate-fade-up text-[0.65rem] font-bold uppercase tracking-[0.35em] text-brand-300">
-            Ride with us
-          </p>
-          <h1 className="mt-4 max-w-3xl animate-fade-up font-heading text-4xl font-extrabold leading-[1.08] tracking-[-0.02em] text-white [animation-delay:90ms] sm:text-5xl lg:text-6xl">
-            Your bike, your hours, your city.
-          </h1>
-          <p className="mt-6 max-w-xl animate-fade-up text-sm leading-relaxed text-white/70 [animation-delay:180ms] sm:text-base">
-            Juba&apos;s kitchens need people who can get food across town while
-            it is still hot. If that is you and your motorbike, the work is here
-            whenever you want it.
-          </p>
+        <div className="relative grid items-center gap-12 px-6 py-20 lg:grid-cols-[1.05fr_0.95fr] lg:px-[5.5%] lg:py-24">
+          <div>
+            <p className="animate-fade-up text-[0.65rem] font-bold uppercase tracking-[0.35em] text-brand-300">
+              Ride with us
+            </p>
+            <h1 className="mt-4 max-w-2xl animate-fade-up font-heading text-4xl font-extrabold leading-[1.08] tracking-[-0.02em] text-white [animation-delay:90ms] sm:text-5xl lg:text-6xl">
+              Your bike, your hours, your city.
+            </h1>
+            <p className="mt-6 max-w-xl animate-fade-up text-sm leading-relaxed text-white/70 [animation-delay:180ms] sm:text-base">
+              Juba&apos;s kitchens need people who can get food across town
+              while it is still hot. If that is you and your motorbike, the work
+              is here whenever you want it.
+            </p>
 
-          <div className="mt-9 flex animate-fade-up flex-wrap items-center gap-3 [animation-delay:270ms]">
-            <a
-              href="#apply"
-              className="group relative overflow-hidden rounded-full bg-brand-500 px-7 py-3.5 text-xs font-bold uppercase tracking-[0.18em] text-white shadow-[0_10px_30px_-10px_rgba(255,109,47,0.9)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-brand-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 active:translate-y-0 active:scale-[0.98] motion-reduce:transform-none"
-            >
-              <span
-                aria-hidden
-                className="absolute inset-y-0 -left-full w-1/2 skew-x-12 bg-white/25 transition-all duration-700 ease-out group-hover:left-[150%] motion-reduce:hidden"
-              />
-              <span className="relative">Apply to ride</span>
-            </a>
-            <Link
-              href="/#partner"
-              className="rounded-full border border-white/25 px-7 py-3.5 text-xs font-bold uppercase tracking-[0.18em] text-white transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 active:translate-y-0 motion-reduce:transform-none"
-            >
-              I run a restaurant
-            </Link>
+            <div className="mt-9 flex animate-fade-up flex-wrap items-center gap-3 [animation-delay:270ms]">
+              <a
+                href="#apply"
+                className="group relative overflow-hidden rounded-full bg-brand-500 px-7 py-3.5 text-xs font-bold uppercase tracking-[0.18em] text-white shadow-[0_10px_30px_-10px_rgba(255,109,47,0.9)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-brand-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 active:translate-y-0 active:scale-[0.98] motion-reduce:transform-none"
+              >
+                <span
+                  aria-hidden
+                  className="absolute inset-y-0 -left-full w-1/2 skew-x-12 bg-white/25 transition-all duration-700 ease-out group-hover:left-[150%] motion-reduce:hidden"
+                />
+                <span className="relative">Apply to ride</span>
+              </a>
+              <Link
+                href="/#partner"
+                className="rounded-full border border-white/25 px-7 py-3.5 text-xs font-bold uppercase tracking-[0.18em] text-white transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 active:translate-y-0 motion-reduce:transform-none"
+              >
+                I run a restaurant
+              </Link>
+            </div>
+          </div>
+
+          <div className="animate-fade-up [animation-delay:360ms]">
+            <Image
+              src={heroIllustration}
+              alt="Two delivery riders collecting orders"
+              priority
+              sizes="(min-width: 1024px) 45vw, 90vw"
+              className="mx-auto h-auto w-full max-w-lg lg:max-w-none"
+            />
           </div>
         </div>
       </section>
@@ -165,19 +170,14 @@ export default function RidersPage() {
               style={{ animationDelay: `${i * 80}ms` }}
               className="group flex animate-fade-up flex-col overflow-hidden rounded-[1.75rem] bg-white shadow-[0_2px_4px_-2px_rgba(0,0,0,0.12),0_20px_46px_-28px_rgba(0,0,0,0.5)] transition-all duration-500 ease-out hover:-translate-y-1.5 motion-reduce:transform-none"
             >
-              {/* Photo band with the icon tile straddling its lower edge */}
-              <div className="relative h-40 w-full overflow-hidden">
+              {/* Illustrations are transparent, so they need a tinted panel
+                  to sit on rather than bleeding to the card edge. */}
+              <div className="flex h-44 w-full items-end justify-center bg-brand-50 px-6 pt-6">
                 <Image
-                  src={item.photo}
-                  alt={item.photoAlt}
-                  fill
-                  placeholder="blur"
+                  src={item.illustration}
+                  alt={item.illustrationAlt}
                   sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-105 motion-reduce:transform-none"
-                />
-                <span
-                  aria-hidden
-                  className="absolute inset-0 bg-linear-to-t from-black/45 to-transparent"
+                  className="h-full w-auto max-w-full object-contain transition-transform duration-500 ease-out group-hover:-translate-y-1 motion-reduce:transform-none"
                 />
               </div>
 
