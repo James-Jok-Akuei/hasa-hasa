@@ -1,10 +1,13 @@
 import Image from "next/image";
-// Images in assets/images/other are reserved for later sections
-// (e.g. a "we deliver" section) — don't add them here.
+// Images in assets/images/other are reserved for later sections — don't add
+// them here. hero-boxes is spoken for by Partner; hero-chicken is a finished
+// banner with its own headline baked in, so it needs a section with no
+// competing copy of its own.
 import heroPizza from "@/app/assets/images/hero-pizza.png";
 import heroHasa from "@/app/assets/images/hero-hasa.png";
 import heroCounter from "@/app/assets/images/hero-counter.png";
 import heroApp from "@/app/assets/images/hero-app.png";
+import heroKurPeter from "@/app/assets/images/kurpeter.jpg";
 
 // `band` is the ambient color the nav band takes while the slide is showing —
 // sampled from each image's top edge.
@@ -34,6 +37,16 @@ export const SLIDES = [
     src: heroApp,
     alt: "Hey Juba — order and pick it up, or order and we deliver",
     band: "#ffffff",
+    anchor: "object-center",
+  },
+  {
+    src: heroKurPeter,
+    alt: "Working on HASA HASA from a table in Juba after dark",
+    // Cropped to 16:9 off the top, so the stage shows it whole like the
+    // artwork slides. Band re-sampled from the new top edge: night sky
+    // through palm fronds, which reads darker and greener than the umbrella
+    // that used to sit there.
+    band: "#292f22",
     anchor: "object-center",
   },
 ];
