@@ -42,9 +42,11 @@ export const SLIDES = [
   {
     src: heroKurPeter,
     alt: "Working on HASA HASA from a table in Juba after dark",
-    // Sampled from the top edge like the rest: the lit umbrella over a night
-    // sky averages to a warm dark rather than the black it looks at a glance.
-    band: "#63523a",
+    // Cropped to 16:9 off the top, so the stage shows it whole like the
+    // artwork slides. Band re-sampled from the new top edge: night sky
+    // through palm fronds, which reads darker and greener than the umbrella
+    // that used to sit there.
+    band: "#292f22",
     anchor: "object-center",
   },
 ];
