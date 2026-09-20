@@ -1,4 +1,7 @@
+import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
+import riderPhoto from "@/app/assets/images/other/hero-boxes.png";
+import kitchenPhoto from "@/app/assets/images/hero-counter.png";
 
 /**
  * The supply side of the marketplace. Two audiences with nothing in common
@@ -6,7 +9,9 @@ import Link from "next/link";
  * tab switch How it works uses — a rider should not have to find their
  * half behind a toggle.
  *
- * Dark, to break the run of brand-orange sections either side of it.
+ * Dark, to break the run of brand-orange sections either side of it. Each
+ * card opens on its own photograph — our own branded packaging, not stock —
+ * fading into the card so the two halves read as one surface.
  */
 
 type Track = {
@@ -16,6 +21,9 @@ type Track = {
   points: string[];
   cta: { label: string; href: string };
   icon: React.ReactNode;
+  photo: StaticImageData;
+  /** Describes the photo; these carry meaning, so they are not decorative. */
+  photoAlt: string;
   /** The restaurant track is the one we actually want clicked. */
   primary?: boolean;
 };
@@ -32,6 +40,9 @@ const TRACKS: Track[] = [
     ],
     cta: { label: "List your restaurant", href: "/signup" },
     icon: <StorefrontIcon />,
+    photo: kitchenPhoto,
+    photoAlt:
+      "A restaurant counter with HASA HASA bags and cups packed and ready to collect",
     primary: true,
   },
   {
@@ -45,6 +56,9 @@ const TRACKS: Track[] = [
     ],
     cta: { label: "Ride with us", href: "#contact" },
     icon: <HelmetIcon />,
+    photo: riderPhoto,
+    photoAlt:
+      "HASA HASA boxes and a paper bag left on a doorstep at the end of a delivery",
   },
 ];
 
@@ -80,78 +94,99 @@ export function Partner() {
             <article
               key={track.eyebrow}
               style={{ animationDelay: `${i * 120}ms` }}
-              className={`group relative flex animate-fade-up flex-col overflow-hidden rounded-[1.75rem] border p-8 transition-all duration-500 ease-out hover:-translate-y-1.5 motion-reduce:transform-none sm:p-10 ${
+              className={`group relative flex animate-fade-up flex-col overflow-hidden rounded-[1.75rem] border transition-all duration-500 ease-out hover:-translate-y-1.5 motion-reduce:transform-none ${
                 track.primary
                   ? "border-brand-500/40 bg-linear-to-br from-brand-500/15 to-brand-500/[0.03] hover:border-brand-500/70"
                   : "border-white/10 bg-white/[0.03] hover:border-white/25"
               }`}
             >
-              {/* Corner bloom on hover, same gesture as the How it works cards */}
-              <span
-                aria-hidden
-                className="pointer-events-none absolute -right-20 -top-20 size-48 rounded-full bg-brand-500/0 blur-3xl transition-colors duration-500 group-hover:bg-brand-500/20"
-              />
-
-              <div className="relative flex items-center gap-4">
+              {/* Photo band. The gradient carries it down into the card so the
+                  two do not read as a picture stuck on a box. */}
+              <div className="relative h-52 w-full overflow-hidden sm:h-60">
+                <Image
+                  src={track.photo}
+                  alt={track.photoAlt}
+                  fill
+                  placeholder="blur"
+                  sizes="(min-width: 1024px) 45vw, 100vw"
+                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-105 motion-reduce:transform-none"
+                />
                 <span
-                  className={`flex size-14 shrink-0 items-center justify-center rounded-2xl transition-transform duration-500 ease-out group-hover:-rotate-6 group-hover:scale-105 motion-reduce:transform-none ${
-                    track.primary
-                      ? "bg-linear-to-br from-brand-400 to-brand-600 text-white shadow-[0_10px_24px_-10px_rgba(255,109,47,0.95)]"
-                      : "bg-white/10 text-white"
-                  }`}
-                >
-                  {track.icon}
-                </span>
-                <p className="text-[0.6rem] font-extrabold uppercase tracking-[0.25em] text-white/50">
-                  {track.eyebrow}
-                </p>
+                  aria-hidden
+                  className="absolute inset-0 bg-linear-to-t from-neutral-950 via-neutral-950/55 to-neutral-950/5"
+                />
+
+                {/* Icon and label ride on the photo rather than below it,
+                    which buys back the vertical space the band costs. */}
+                <div className="absolute inset-x-0 bottom-0 flex items-center gap-4 p-7 sm:p-9">
+                  <span
+                    className={`flex size-14 shrink-0 items-center justify-center rounded-2xl transition-transform duration-500 ease-out group-hover:-rotate-6 group-hover:scale-105 motion-reduce:transform-none ${
+                      track.primary
+                        ? "bg-linear-to-br from-brand-400 to-brand-600 text-white shadow-[0_10px_24px_-10px_rgba(255,109,47,0.95)]"
+                        : "bg-white/15 text-white backdrop-blur-md"
+                    }`}
+                  >
+                    {track.icon}
+                  </span>
+                  <p className="text-[0.6rem] font-extrabold uppercase tracking-[0.25em] text-white/70">
+                    {track.eyebrow}
+                  </p>
+                </div>
               </div>
 
-              <h3 className="relative mt-7 font-heading text-2xl font-extrabold tracking-[-0.01em] text-white">
-                {track.title}
-              </h3>
-              <p className="relative mt-3 text-sm leading-relaxed text-white/60">
-                {track.body}
-              </p>
+              <div className="relative flex grow flex-col p-7 pt-6 sm:p-9 sm:pt-7">
+                {/* Corner bloom on hover, same gesture as the How it works cards */}
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute -right-20 top-0 size-48 rounded-full bg-brand-500/0 blur-3xl transition-colors duration-500 group-hover:bg-brand-500/20"
+                />
 
-              <ul className="relative mt-7 flex flex-col gap-3.5">
-                {track.points.map((point) => (
-                  <li key={point} className="flex items-start gap-3">
-                    <span
-                      className={`mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full ${
-                        track.primary
-                          ? "bg-brand-500 text-white"
-                          : "bg-white/15 text-white"
-                      }`}
-                    >
-                      <CheckIcon />
-                    </span>
-                    <span className="text-sm leading-relaxed text-white/75">
-                      {point}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+                <h3 className="relative font-heading text-2xl font-extrabold tracking-[-0.01em] text-white">
+                  {track.title}
+                </h3>
+                <p className="relative mt-3 text-sm leading-relaxed text-white/60">
+                  {track.body}
+                </p>
 
-              {/* Pushed to the bottom so both cards' buttons line up however
+                <ul className="relative mt-7 flex flex-col gap-3.5">
+                  {track.points.map((point) => (
+                    <li key={point} className="flex items-start gap-3">
+                      <span
+                        className={`mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full ${
+                          track.primary
+                            ? "bg-brand-500 text-white"
+                            : "bg-white/15 text-white"
+                        }`}
+                      >
+                        <CheckIcon />
+                      </span>
+                      <span className="text-sm leading-relaxed text-white/75">
+                        {point}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Pushed to the bottom so both cards' buttons line up however
                   much copy sits above them */}
-              <div className="relative mt-9 flex grow items-end">
-                <Link
-                  href={track.cta.href}
-                  className={`group/cta relative inline-flex items-center gap-2.5 overflow-hidden rounded-full px-7 py-3 text-xs font-bold uppercase tracking-[0.18em] transition-all duration-300 ease-out hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 active:translate-y-0 active:scale-[0.98] motion-reduce:transform-none ${
-                    track.primary
-                      ? "bg-brand-500 text-white shadow-[0_10px_30px_-10px_rgba(255,109,47,0.9)] hover:bg-brand-400 hover:shadow-[0_18px_40px_-12px_rgba(255,109,47,1)]"
-                      : "border border-white/25 text-white hover:border-white/60"
-                  }`}
-                >
-                  {/* Sheen sweep, matching the hero's primary button */}
-                  <span
-                    aria-hidden
-                    className="absolute inset-y-0 -left-full w-1/2 skew-x-12 bg-white/20 transition-all duration-700 ease-out group-hover/cta:left-[150%] motion-reduce:hidden"
-                  />
-                  <span className="relative">{track.cta.label}</span>
-                  <ArrowIcon />
-                </Link>
+                <div className="relative mt-9 flex grow items-end">
+                  <Link
+                    href={track.cta.href}
+                    className={`group/cta relative inline-flex items-center gap-2.5 overflow-hidden rounded-full px-7 py-3 text-xs font-bold uppercase tracking-[0.18em] transition-all duration-300 ease-out hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 active:translate-y-0 active:scale-[0.98] motion-reduce:transform-none ${
+                      track.primary
+                        ? "bg-brand-500 text-white shadow-[0_10px_30px_-10px_rgba(255,109,47,0.9)] hover:bg-brand-400 hover:shadow-[0_18px_40px_-12px_rgba(255,109,47,1)]"
+                        : "border border-white/25 text-white hover:border-white/60"
+                    }`}
+                  >
+                    {/* Sheen sweep, matching the hero's primary button */}
+                    <span
+                      aria-hidden
+                      className="absolute inset-y-0 -left-full w-1/2 skew-x-12 bg-white/20 transition-all duration-700 ease-out group-hover/cta:left-[150%] motion-reduce:hidden"
+                    />
+                    <span className="relative">{track.cta.label}</span>
+                    <ArrowIcon />
+                  </Link>
+                </div>
               </div>
             </article>
           ))}

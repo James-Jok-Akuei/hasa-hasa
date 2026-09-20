@@ -1,6 +1,8 @@
 import Image from "next/image";
-// Images in assets/images/other are reserved for later sections
-// (e.g. a "we deliver" section) — don't add them here.
+// Images in assets/images/other are reserved for later sections — don't add
+// them here. hero-boxes is spoken for by Partner; hero-chicken is a finished
+// banner with its own headline baked in, so it needs a section with no
+// competing copy of its own.
 import heroPizza from "@/app/assets/images/hero-pizza.png";
 import heroHasa from "@/app/assets/images/hero-hasa.png";
 import heroCounter from "@/app/assets/images/hero-counter.png";
