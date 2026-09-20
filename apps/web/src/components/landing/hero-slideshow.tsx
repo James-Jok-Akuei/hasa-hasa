@@ -7,6 +7,7 @@ import heroPizza from "@/app/assets/images/hero-pizza.png";
 import heroHasa from "@/app/assets/images/hero-hasa.png";
 import heroCounter from "@/app/assets/images/hero-counter.png";
 import heroApp from "@/app/assets/images/hero-app.png";
+import heroKurPeter from "@/app/assets/images/kurpeter.jpg";
 
 // `band` is the ambient color the nav band takes while the slide is showing —
 // sampled from each image's top edge.
@@ -36,6 +37,14 @@ export const SLIDES = [
     src: heroApp,
     alt: "Hey Juba — order and pick it up, or order and we deliver",
     band: "#ffffff",
+    anchor: "object-center",
+  },
+  {
+    src: heroKurPeter,
+    alt: "Working on HASA HASA from a table in Juba after dark",
+    // Sampled from the top edge like the rest: the lit umbrella over a night
+    // sky averages to a warm dark rather than the black it looks at a glance.
+    band: "#63523a",
     anchor: "object-center",
   },
 ];
