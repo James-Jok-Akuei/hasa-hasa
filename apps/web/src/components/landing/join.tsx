@@ -21,7 +21,6 @@ type Door = {
   title: string;
   body: string;
   href: string;
-  icon: React.ReactNode;
   cta: string;
   illustration: StaticImageData;
   illustrationAlt: string;
@@ -35,7 +34,6 @@ const DOORS: Door[] = [
     title: "Order from Juba's kitchens",
     body: "Browse menus, pay with MoMo or cash, and have it delivered or ready to collect.",
     href: "#download",
-    icon: <BagIcon />,
     illustration: orderIllustration,
     illustrationAlt: "Two people sharing a meal at a table",
     cta: "App coming soon",
@@ -46,7 +44,6 @@ const DOORS: Door[] = [
     title: "Put your restaurant online",
     body: "Take orders from your phone. Set up your menu in minutes and start the same day you are approved.",
     href: "/signup",
-    icon: <StoreIcon />,
     illustration: sellIllustration,
     illustrationAlt: "A street food kitchen serving customers",
     cta: "List your restaurant",
@@ -56,7 +53,6 @@ const DOORS: Door[] = [
     title: "Deliver on your own hours",
     body: "Pick up from kitchens near you, choose the jobs that suit you, and get paid to MoMo.",
     href: "/riders",
-    icon: <BikeIcon />,
     illustration: rideIllustration,
     illustrationAlt: "A delivery rider on a scooter with a food box",
     cta: "Apply to ride",
@@ -107,18 +103,8 @@ export function Join() {
             </div>
 
             <div className="flex grow flex-col p-8">
-              <span
-                className={`flex size-14 items-center justify-center rounded-2xl transition-transform duration-500 ease-out motion-reduce:transform-none ${
-                  door.pending
-                    ? "bg-white/[0.06] text-white/35"
-                    : "bg-linear-to-br from-brand-400 to-brand-600 text-white shadow-[0_10px_24px_-10px_rgba(255,109,47,0.95)] group-hover:-rotate-6 group-hover:scale-105"
-                }`}
-              >
-                {door.icon}
-              </span>
-
               <p
-                className={`mt-6 text-[0.6rem] font-extrabold uppercase tracking-[0.25em] ${
+                className={`text-[0.6rem] font-extrabold uppercase tracking-[0.25em] ${
                   door.pending ? "text-white/30" : "text-brand-300"
                 }`}
               >
@@ -169,64 +155,6 @@ export function Join() {
         ))}
       </div>
     </section>
-  );
-}
-
-function BagIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="size-7"
-      aria-hidden
-    >
-      <path d="M5.5 7.5h13l-1 13h-11z" />
-      <path d="M8.5 7.5a3.5 3.5 0 0 1 7 0" />
-    </svg>
-  );
-}
-
-function StoreIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="size-7"
-      aria-hidden
-    >
-      <path d="M3.5 9.5V19a1.5 1.5 0 0 0 1.5 1.5h14a1.5 1.5 0 0 0 1.5-1.5V9.5" />
-      <path d="M2.5 9.5 4.2 4.6A1.5 1.5 0 0 1 5.6 3.5h12.8a1.5 1.5 0 0 1 1.4 1.1l1.7 4.9a3 3 0 0 1-5.8 1 3 3 0 0 1-5.8 0 3 3 0 0 1-5.8-1z" />
-      <path d="M9.5 20.5v-5h5v5" />
-    </svg>
-  );
-}
-
-function BikeIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="size-7"
-      aria-hidden
-    >
-      <circle cx="5.5" cy="17" r="3" />
-      <circle cx="18.5" cy="17" r="3" />
-      <path d="M8.5 17h7" />
-      <path d="M18.5 17V8.5h-3.5" />
-      <path d="M3.5 5.5h3l2.6 11.5" />
-    </svg>
   );
 }
 
