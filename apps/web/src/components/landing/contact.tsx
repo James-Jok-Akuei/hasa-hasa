@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import contactIllustration from "@/app/assets/images/landing/il-contact.svg";
+import whatsappLogo from "@/app/assets/images/landing/logo-whatsapp.svg";
 
 /**
  * Fill these in and the cards appear. They are empty rather than filled with
@@ -22,6 +23,8 @@ type Channel = {
   href: string;
   detail: string;
   icon: React.ReactNode;
+  /** Renders on white so the logo keeps its own colours. */
+  brand?: boolean;
 };
 
 function channels(): Channel[] {
@@ -34,7 +37,8 @@ function channels(): Channel[] {
       // wa.me wants digits only.
       href: `https://wa.me/${CONTACT.whatsapp.replace(/\D/g, "")}`,
       detail: "Fastest. Message us and we reply here.",
-      icon: <WhatsAppIcon />,
+      icon: <Image src={whatsappLogo} alt="" aria-hidden className="size-7" />,
+      brand: true,
     });
   }
 
@@ -98,7 +102,13 @@ export function Contact() {
                     }
                     className="group flex items-center gap-5 rounded-[1.5rem] bg-white p-5 shadow-[0_2px_4px_-2px_rgba(0,0,0,0.12),0_20px_46px_-28px_rgba(0,0,0,0.5)] transition-all duration-300 ease-out hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 motion-reduce:transform-none"
                   >
-                    <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-brand-400 to-brand-600 text-white shadow-[0_10px_24px_-10px_rgba(255,109,47,0.95)] transition-transform duration-300 group-hover:-rotate-6 motion-reduce:transform-none">
+                    <span
+                      className={`flex size-12 shrink-0 items-center justify-center rounded-2xl transition-transform duration-300 group-hover:-rotate-6 motion-reduce:transform-none ${
+                        channel.brand
+                          ? "border border-neutral-900/10 bg-white"
+                          : "bg-linear-to-br from-brand-400 to-brand-600 text-white shadow-[0_10px_24px_-10px_rgba(255,109,47,0.95)]"
+                      }`}
+                    >
                       {channel.icon}
                     </span>
                     <span className="min-w-0 flex-1">
@@ -153,14 +163,6 @@ export function Contact() {
         />
       </div>
     </section>
-  );
-}
-
-function WhatsAppIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="size-6" aria-hidden>
-      <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.15h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.38c0-4.54 3.7-8.23 8.25-8.23 2.2 0 4.27.86 5.83 2.41a8.19 8.19 0 0 1 2.41 5.83c0 4.54-3.7 8.23-8.24 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.24-.64.8-.78.97-.15.16-.29.18-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.43.13-.15.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.23.25-.86.85-.86 2.07s.89 2.4 1.01 2.56c.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.15-1.18-.06-.1-.23-.16-.48-.29z" />
-    </svg>
   );
 }
 

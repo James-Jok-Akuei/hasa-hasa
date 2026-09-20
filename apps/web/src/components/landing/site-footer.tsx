@@ -2,6 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import logo from "@/app/assets/logos/logo-main.svg";
 import { StoreBadges, storesAreLive } from "@/components/landing/store-badges";
+import facebookLogo from "@/app/assets/images/landing/logo-facebook.svg";
+import instagramLogo from "@/app/assets/images/landing/logo-instagram.svg";
+import whatsappLogo from "@/app/assets/images/landing/logo-whatsapp.svg";
 
 /**
  * Fill these in and each icon appears. Empty ones are left out rather than
@@ -11,6 +14,7 @@ import { StoreBadges, storesAreLive } from "@/components/landing/store-badges";
 const SOCIALS = {
   facebook: "",
   instagram: "",
+  whatsapp: "",
   x: "",
   linkedin: "",
 };
@@ -19,13 +23,20 @@ const SOCIALS = {
 const PHONE = "+211 925 903 077";
 
 /**
- * Only the payment methods the platform actually takes. Card rails are not
- * wired up, so no Visa or Mastercard marks here — and these are set as type
- * rather than borrowed logos, which keeps someone else's trademark off the
- * page until there is a partnership that licenses it.
+ * Only the payment methods the platform actually takes — no Visa or
+ * Mastercard, since no card rail is wired up.
+ *
+ * MoMo is set in MTN's yellow and black rather than using their logo file:
+ * MTN's mark is not published under a licence we can redistribute, so the
+ * real asset has to come from the merchant brand pack. Drop it in at
+ * logo-mtn-momo.svg and swap the chip below for an <Image>.
  */
 const PAYMENTS = [
-  { name: "MTN MoMo", detail: "Mobile money" },
+  {
+    name: "MoMo",
+    detail: "MTN Mobile Money",
+    wordmark: true,
+  },
   { name: "Cash", detail: "On delivery" },
 ];
 
@@ -41,8 +52,24 @@ const LINKS = [
 
 export function SiteFooter() {
   const socials = [
-    { key: "facebook", label: "Facebook", icon: <FacebookIcon /> },
-    { key: "instagram", label: "Instagram", icon: <InstagramIcon /> },
+    {
+      key: "facebook",
+      label: "Facebook",
+      icon: <Image src={facebookLogo} alt="" aria-hidden className="size-5" />,
+    },
+    {
+      key: "instagram",
+      label: "Instagram",
+      icon: <Image src={instagramLogo} alt="" aria-hidden className="size-5" />,
+    },
+    {
+      key: "whatsapp",
+      label: "WhatsApp",
+      icon: <Image src={whatsappLogo} alt="" aria-hidden className="size-5" />,
+    },
+    /* X and LinkedIn publish no reusable mark — both had theirs pulled from
+       the icon set over trademark — so these stay as drawn glyphs, tinted
+       to each brand's colour. */
     { key: "x", label: "X", icon: <XIcon /> },
     { key: "linkedin", label: "LinkedIn", icon: <LinkedInIcon /> },
   ].filter((s) => SOCIALS[s.key as keyof typeof SOCIALS]);
@@ -84,7 +111,7 @@ export function SiteFooter() {
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={social.label}
-                      className="flex size-10 items-center justify-center rounded-full border border-white/40 text-white transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-white hover:bg-white hover:text-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white motion-reduce:transform-none"
+                      className="flex size-10 items-center justify-center rounded-full bg-white shadow-[0_6px_16px_-8px_rgba(0,0,0,0.5)] transition-transform duration-300 ease-out hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white motion-reduce:transform-none"
                     >
                       {social.icon}
                     </a>
@@ -114,9 +141,15 @@ export function SiteFooter() {
                 key={method.name}
                 className="flex items-center gap-3 rounded-2xl bg-white/10 px-4 py-3 backdrop-blur-sm"
               >
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white text-brand-600">
-                  {method.name === "Cash" ? <CashIcon /> : <MobileIcon />}
-                </span>
+                {method.wordmark ? (
+                  <span className="flex h-9 shrink-0 items-center rounded-xl bg-[#FFCC00] px-2.5 font-heading text-sm font-extrabold tracking-[-0.02em] text-neutral-900">
+                    MoMo
+                  </span>
+                ) : (
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white text-brand-600">
+                    <CashIcon />
+                  </span>
+                )}
                 <span className="leading-tight">
                   <span className="block text-sm font-bold">{method.name}</span>
                   <span className="block text-xs text-white/70">
@@ -175,24 +208,6 @@ export function SiteFooter() {
   );
 }
 
-function MobileIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="size-5"
-      aria-hidden
-    >
-      <rect x="6" y="2.5" width="12" height="19" rx="3" />
-      <path d="M10.5 18.5h3" />
-    </svg>
-  );
-}
-
 function CashIcon() {
   return (
     <svg
@@ -228,34 +243,9 @@ function PhoneIcon() {
   );
 }
 
-function FacebookIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="size-4" aria-hidden>
-      <path d="M13.5 21v-8h2.7l.4-3h-3.1V8.1c0-.9.3-1.5 1.5-1.5h1.6V4c-.3 0-1.3-.1-2.4-.1-2.4 0-4 1.5-4 4.1V10H7.4v3h2.8v8z" />
-    </svg>
-  );
-}
-
-function InstagramIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      className="size-4"
-      aria-hidden
-    >
-      <rect x="3" y="3" width="18" height="18" rx="5" />
-      <circle cx="12" cy="12" r="4" />
-      <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
-
 function XIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="size-4" aria-hidden>
+    <svg viewBox="0 0 24 24" fill="#000000" className="size-4" aria-hidden>
       <path d="M17.5 3h3l-6.6 7.5L21.8 21h-6l-4.7-6.1L5.7 21h-3l7-8L2.5 3h6.2l4.2 5.6zm-1 16h1.7L7.6 4.7H5.8z" />
     </svg>
   );
@@ -263,7 +253,7 @@ function XIcon() {
 
 function LinkedInIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="size-4" aria-hidden>
+    <svg viewBox="0 0 24 24" fill="#0A66C2" className="size-4" aria-hidden>
       <path d="M6.9 21H3.6V9.1h3.3zM5.2 7.6a1.9 1.9 0 1 1 0-3.9 1.9 1.9 0 0 1 0 3.9zM21 21h-3.3v-5.8c0-1.4 0-3.2-2-3.2s-2.2 1.5-2.2 3.1V21H10.2V9.1h3.1v1.6h.1c.5-.8 1.6-1.8 3.2-1.8 3.4 0 4.4 2.2 4.4 5.2z" />
     </svg>
   );
