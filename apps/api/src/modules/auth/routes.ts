@@ -162,8 +162,14 @@ const authRoutes: FastifyPluginAsyncZod = async (app) => {
   );
 
   /**
-   * Step one of login. Always answers the same way: telling the caller
-   * whether an address has an account is an enumeration oracle.
+   * Step one of login. Answers 404 for an address with no account, so the
+   * form can say so instead of asking for a code that was never sent.
+   *
+   * That makes this an enumeration oracle: anyone can learn which addresses
+   * are registered by trying them. Accepted deliberately — a merchant who
+   * mistypes their address would otherwise sit on the code screen waiting
+   * for mail that is never coming. The rate limit is what keeps the oracle
+   * slow; nothing here reveals more than "registered or not".
    */
   app.post(
     "/auth/login",
@@ -175,16 +181,17 @@ const authRoutes: FastifyPluginAsyncZod = async (app) => {
           "Step one of two. Mails a six-digit code if the address has an",
           "account.",
           "",
-          "**Always answers 202, whether or not the account exists.** Telling",
-          "a caller which addresses are registered would let anyone enumerate",
-          "the merchant list.",
+          "**Answers 404 when the address has no account**, so the caller can",
+          "point the person at signup. This is knowingly an enumeration",
+          "oracle — the rate limit, not the response shape, is what bounds it.",
           "",
           "Subject to the same 60 second cooldown as signup.",
         ].join("\n"),
         body: requestOtpSchema,
         response: {
-          202: otpSentResponse.describe("Answered identically for unknown addresses"),
+          202: otpSentResponse.describe("Code sent"),
           400: errorResponse.describe("Validation failed"),
+          404: errorResponse.describe("EMAIL_NOT_REGISTERED — no account for this address"),
           429: errorResponse.describe("Cooldown — see retryAfterSeconds"),
           502: errorResponse.describe("The email could not be sent — safe to retry immediately"),
         },
@@ -195,20 +202,26 @@ const authRoutes: FastifyPluginAsyncZod = async (app) => {
         where: { email: request.body.email },
       });
 
-      if (user) {
-        try {
-          await issueOtp(user.email, "LOGIN");
-        } catch (error) {
-          if (error instanceof OtpError) {
-            request.log.warn({ err: error, code: error.code }, "login otp failed");
-            return reply.code(error.code === "COOLDOWN" ? 429 : 502).send({
-              error: error.code,
-              message: error.message,
-              retryAfterSeconds: error.retryAfterSeconds,
-            });
-          }
-          throw error;
+      if (!user) {
+        return reply.code(404).send({
+          error: "EMAIL_NOT_REGISTERED",
+          message:
+            "That email is not registered yet. Create an account to get started.",
+        });
+      }
+
+      try {
+        await issueOtp(user.email, "LOGIN");
+      } catch (error) {
+        if (error instanceof OtpError) {
+          request.log.warn({ err: error, code: error.code }, "login otp failed");
+          return reply.code(error.code === "COOLDOWN" ? 429 : 502).send({
+            error: error.code,
+            message: error.message,
+            retryAfterSeconds: error.retryAfterSeconds,
+          });
         }
+        throw error;
       }
 
       return reply.code(202).send({ sent: true });
