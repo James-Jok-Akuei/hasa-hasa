@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import promoBanner from "@/app/assets/images/other/hero-chicken.png";
+import QRCode from "qrcode";
+import downloadIllustration from "@/app/assets/images/landing/il-download.svg";
 
 /**
  * The buyer-facing "get the app" band.
@@ -9,23 +10,48 @@ import promoBanner from "@/app/assets/images/other/hero-chicken.png";
  * badges are marked coming soon and are not links. A dead App Store button
  * on a launch page costs more trust than an honest "not yet" does.
  *
- * Swap the two badges for real links the day the listings go live — that is
- * the only change this section needs.
+ * The QR is generated at render time from NEXT_PUBLIC_APP_URL rather than
+ * committed as an image, so pointing it somewhere real is an env change and
+ * never a stale picture. Unset, the panel says so instead of showing a code
+ * that scans to nothing.
  */
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL;
 
 /** Android first: it is what Juba carries. iOS follows. */
 const STORES = ["Google Play", "App Store"];
 
-export function Download() {
+async function qrSvg(url: string) {
+  return QRCode.toString(url, {
+    type: "svg",
+    errorCorrectionLevel: "M",
+    margin: 0,
+    color: { dark: "#0a0a0a", light: "#ffffff" },
+  });
+}
+
+export async function Download() {
+  const qr = APP_URL ? await qrSvg(APP_URL) : null;
+
   return (
     <section
       id="download"
       className="scroll-mt-24 bg-brand-500 px-6 py-20 lg:px-[5.5%] lg:py-24"
     >
       <div className="overflow-hidden rounded-[2rem] bg-neutral-950 shadow-[0_30px_80px_-40px_rgba(0,0,0,0.8)]">
-        <div className="grid lg:grid-cols-2">
-          {/* Copy */}
-          <div className="order-2 p-8 sm:p-12 lg:order-1 lg:p-14">
+        <div className="grid items-center lg:grid-cols-2">
+          {/* Illustration */}
+          <div className="order-1 flex justify-center p-8 sm:p-12 lg:p-14">
+            <Image
+              src={downloadIllustration}
+              alt="Two people setting up the app on a phone"
+              sizes="(min-width: 1024px) 45vw, 80vw"
+              className="h-auto w-full max-w-sm lg:max-w-md"
+            />
+          </div>
+
+          {/* Copy, QR and badges */}
+          <div className="order-2 p-8 pt-0 sm:p-12 sm:pt-0 lg:p-14 lg:pl-0">
             <p className="text-[0.65rem] font-bold uppercase tracking-[0.35em] text-brand-300">
               Download
             </p>
@@ -33,31 +59,55 @@ export function Download() {
               The app is on its way.
             </h2>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-white/60 sm:text-base">
-              Ordering from your phone lands soon — Android first, since that is
-              what Juba carries. Until then, the two sides of the kitchen can
-              already get started.
+              Order from Juba&apos;s kitchens and follow your rider to the door.
+              Android first, since that is what Juba carries.
             </p>
 
-            <div className="mt-9 flex flex-wrap gap-3">
-              {STORES.map((store) => (
-                <div
-                  key={store}
-                  aria-disabled="true"
-                  className="flex cursor-not-allowed items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-3.5"
-                >
-                  <span className="text-white/40">
-                    <DeviceIcon />
-                  </span>
-                  <span className="flex flex-col leading-tight">
-                    <span className="text-[0.6rem] font-bold uppercase tracking-[0.2em] text-brand-300">
-                      Coming soon
+            <div className="mt-9 flex flex-wrap items-center gap-6">
+              {/* Scan panel */}
+              <div className="flex flex-col items-center gap-2.5">
+                <div className="flex size-[7.5rem] items-center justify-center rounded-2xl bg-white p-3">
+                  {qr ? (
+                    <div
+                      className="size-full [&>svg]:size-full"
+                      aria-label="QR code linking to the app"
+                      role="img"
+                      dangerouslySetInnerHTML={{ __html: qr }}
+                    />
+                  ) : (
+                    <span className="px-2 text-center text-[0.6rem] font-bold uppercase leading-tight tracking-[0.12em] text-neutral-400">
+                      Scan code
+                      <br />
+                      coming soon
                     </span>
-                    <span className="text-sm font-semibold text-white/70">
-                      {store}
-                    </span>
-                  </span>
+                  )}
                 </div>
-              ))}
+                <span className="text-[0.6rem] font-bold uppercase tracking-[0.2em] text-white/40">
+                  Scan to install
+                </span>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                {STORES.map((store) => (
+                  <div
+                    key={store}
+                    aria-disabled="true"
+                    className="flex cursor-not-allowed items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-3"
+                  >
+                    <span className="text-white/40">
+                      <DeviceIcon />
+                    </span>
+                    <span className="flex flex-col leading-tight">
+                      <span className="text-[0.6rem] font-bold uppercase tracking-[0.2em] text-brand-300">
+                        Coming soon
+                      </span>
+                      <span className="text-sm font-semibold text-white/70">
+                        {store}
+                      </span>
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* The honest alternative: two things that do work today. */}
@@ -84,24 +134,6 @@ export function Download() {
                 </Link>
               </div>
             </div>
-          </div>
-
-          {/* The banner carries its own headline, so it gets a panel to
-              itself rather than sitting behind text that competes with it. */}
-          <div className="relative order-1 min-h-[16rem] lg:order-2 lg:min-h-full">
-            <Image
-              src={promoBanner}
-              alt="Juba — HASA HASA is here. Get your food delivered now."
-              fill
-              sizes="(min-width: 1024px) 50vw, 100vw"
-              placeholder="blur"
-              className="object-cover"
-            />
-            {/* Feathers the banner's black edge into the panel beside it */}
-            <span
-              aria-hidden
-              className="absolute inset-y-0 left-0 hidden w-24 bg-linear-to-r from-neutral-950 to-transparent lg:block"
-            />
           </div>
         </div>
       </div>

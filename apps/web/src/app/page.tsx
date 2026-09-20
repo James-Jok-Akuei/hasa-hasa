@@ -1,4 +1,6 @@
+import { Contact } from "@/components/landing/contact";
 import { Download } from "@/components/landing/download";
+import { Faq } from "@/components/landing/faq";
 import { HeroSection } from "@/components/landing/hero-section";
 import { HowItWorks } from "@/components/landing/how-it-works";
 import { Join } from "@/components/landing/join";
@@ -13,6 +15,8 @@ export default function LandingPage() {
       <Partner />
       <Download />
       <Join />
+      <Faq />
+      <Contact />
     </main>
   );
 }
