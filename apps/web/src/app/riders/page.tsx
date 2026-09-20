@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { SiteFooter } from "@/components/landing/site-footer";
 import { SiteNav } from "@/components/landing/site-nav";
 import { RiderForm } from "@/components/riders/rider-form";
 import riderIllustration from "@/app/assets/images/riderImages/rider-illustration.png";
@@ -313,6 +314,8 @@ export default function RidersPage() {
           <RiderForm />
         </div>
       </section>
+
+      <SiteFooter />
     </main>
   );
 }
