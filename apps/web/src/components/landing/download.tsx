@@ -1,37 +1,40 @@
 import Image from "next/image";
 import Link from "next/link";
-import QRCode from "qrcode";
+import appStoreBadge from "@/app/assets/images/landing/badge-app-store.svg";
+import googlePlayBadge from "@/app/assets/images/landing/badge-google-play.png";
 import downloadIllustration from "@/app/assets/images/landing/il-download.svg";
 
 /**
  * The buyer-facing "get the app" band.
  *
- * There is no app in a store yet, so nothing here pretends otherwise: the
- * badges are marked coming soon and are not links. A dead App Store button
- * on a launch page costs more trust than an honest "not yet" does.
- *
- * The QR is generated at render time from NEXT_PUBLIC_APP_URL rather than
- * committed as an image, so pointing it somewhere real is an env change and
- * never a stale picture. Unset, the panel says so instead of showing a code
- * that scans to nothing.
+ * The badges are Apple's and Google's own artwork, taken from their official
+ * sources rather than traced or lifted from a screenshot. Both companies ask
+ * that a badge link to the app's listing and nothing else, so until the
+ * listings exist these are not links: they render dimmed under a "coming
+ * soon" line. Set the two env vars and each becomes a real link on its own.
  */
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL;
+const STORES = [
+  {
+    name: "App Store",
+    href: process.env.NEXT_PUBLIC_IOS_URL,
+    badge: appStoreBadge,
+    alt: "Download on the App Store",
+    /* Apple's lockup is trimmed; Google's carries its required clear space
+       inside the file, so it needs more height to match optically. */
+    className: "h-11 w-auto sm:h-12",
+  },
+  {
+    name: "Google Play",
+    href: process.env.NEXT_PUBLIC_ANDROID_URL,
+    badge: googlePlayBadge,
+    alt: "Get it on Google Play",
+    className: "-my-2 -ml-2.5 h-[3.6rem] w-auto sm:h-[3.9rem]",
+  },
+];
 
-/** Android first: it is what Juba carries. iOS follows. */
-const STORES = ["Google Play", "App Store"];
-
-async function qrSvg(url: string) {
-  return QRCode.toString(url, {
-    type: "svg",
-    errorCorrectionLevel: "M",
-    margin: 0,
-    color: { dark: "#0a0a0a", light: "#ffffff" },
-  });
-}
-
-export async function Download() {
-  const qr = APP_URL ? await qrSvg(APP_URL) : null;
+export function Download() {
+  const live = STORES.some((store) => store.href);
 
   return (
     <section
@@ -63,51 +66,43 @@ export async function Download() {
               Android first, since that is what Juba carries.
             </p>
 
-            <div className="mt-9 flex flex-wrap items-center gap-6">
-              {/* Scan panel */}
-              <div className="flex flex-col items-center gap-2.5">
-                <div className="flex size-[7.5rem] items-center justify-center rounded-2xl bg-white p-3">
-                  {qr ? (
-                    <div
-                      className="size-full [&>svg]:size-full"
-                      aria-label="QR code linking to the app"
-                      role="img"
-                      dangerouslySetInnerHTML={{ __html: qr }}
-                    />
+            <div className="mt-9">
+              <div className="flex flex-wrap items-center gap-4">
+                {STORES.map((store) =>
+                  store.href ? (
+                    <a
+                      key={store.name}
+                      href={store.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-xl transition-transform duration-300 ease-out hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 focus-visible:ring-offset-4 focus-visible:ring-offset-neutral-950 motion-reduce:transform-none"
+                    >
+                      <Image
+                        src={store.badge}
+                        alt={store.alt}
+                        className={store.className}
+                      />
+                    </a>
                   ) : (
-                    <span className="px-2 text-center text-[0.6rem] font-bold uppercase leading-tight tracking-[0.12em] text-neutral-400">
-                      Scan code
-                      <br />
-                      coming soon
-                    </span>
-                  )}
-                </div>
-                <span className="text-[0.6rem] font-bold uppercase tracking-[0.2em] text-white/40">
-                  Scan to install
-                </span>
+                    /* No listing to point at, so it must not behave like a
+                       button. Dimmed, unclickable, and hidden from the
+                       accessibility tree — the line below carries the news. */
+                    <Image
+                      key={store.name}
+                      src={store.badge}
+                      alt=""
+                      aria-hidden
+                      className={`${store.className} cursor-not-allowed opacity-45 grayscale`}
+                    />
+                  ),
+                )}
               </div>
 
-              <div className="flex flex-col gap-3">
-                {STORES.map((store) => (
-                  <div
-                    key={store}
-                    aria-disabled="true"
-                    className="flex cursor-not-allowed items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-3"
-                  >
-                    <span className="text-white/40">
-                      <DeviceIcon />
-                    </span>
-                    <span className="flex flex-col leading-tight">
-                      <span className="text-[0.6rem] font-bold uppercase tracking-[0.2em] text-brand-300">
-                        Coming soon
-                      </span>
-                      <span className="text-sm font-semibold text-white/70">
-                        {store}
-                      </span>
-                    </span>
-                  </div>
-                ))}
-              </div>
+              {!live ? (
+                <p className="mt-4 text-[0.6rem] font-bold uppercase tracking-[0.2em] text-brand-300">
+                  Coming soon to both stores
+                </p>
+              ) : null}
             </div>
 
             {/* The honest alternative: two things that do work today. */}
@@ -138,23 +133,5 @@ export async function Download() {
         </div>
       </div>
     </section>
-  );
-}
-
-function DeviceIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="size-6"
-      aria-hidden
-    >
-      <rect x="6" y="2.5" width="12" height="19" rx="3" />
-      <path d="M10.5 18.5h3" />
-    </svg>
   );
 }
